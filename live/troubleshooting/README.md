@@ -1,7 +1,15 @@
-# 트러블슈팅
+# Troubleshooting — Live
 
-증상별로 원인·검증·해결을 축적합니다.
+live stream 증상별 **원인 · 확인 · 해결** 메모.
 
-- [jitter.md](jitter.md)
+---
 
-추가 예정: 연결 끊김, 포즈 튐, 지연 누적, 손가락만 따로 노는 경우
+## Docs
+
+| Doc | Symptom |
+|-----|---------|
+| [jitter.md](jitter.md) | jitter · stutter |
+
+**Planned:** disconnect · pose pop · latency drift · fingers desync
+
+세션 기록: [issue-log.md](../../shared/templates/issue-log.md)

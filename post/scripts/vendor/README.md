@@ -1,8 +1,11 @@
-# vendor — 외부 GitHub 코드
+# Vendor — External GitHub Code
 
-[Retargeter](https://github.com/eksod/Retargeter), [OpenMoBu](https://github.com/Neill3d/OpenMoBu) PythonScripts 등 **외부 repo**를 이 저장소·Mobu에 붙이는 방법.
+Retargeter · OpenMoBu 등 **외부 repo**를 이 저장소·Mobu에 붙이는 방법.
 
-본인 작성 스크립트는 `post/scripts/` 루트, **외부에서 가져온 것**은 `post/scripts/vendor/<이름>/` 에 둔다.
+| Put here | Path |
+|----------|------|
+| 직접 작성 | `post/scripts/*.py` |
+| 외부에서 가져온 것 | `post/scripts/vendor/<name>/` |
 
 ```text
 post/scripts/
@@ -162,8 +165,7 @@ Mobu 2025 → `Window` → `Python Editor` → **`vendor/retargeter/retargeter.p
 
 ---
 
-## 관련
+## Links
 
-- [../README.md](../README.md) — 스크립트 규칙·템플릿
-- [../../installation.md](../../installation.md) — Mobu 경로·스텁
-- [../../external-tools.md](../../external-tools.md) — 도구 카탈로그
+- [../README.md](../README.md) — scripts index
+- [../../installation.md](../../installation.md) · [../../external-tools.md](../../external-tools.md)

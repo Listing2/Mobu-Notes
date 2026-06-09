@@ -1,53 +1,55 @@
-# MotionBuilder Python 스크립트
+# Scripts — Mobu Python
 
-Mobu 2025 Python API(`pyfbsdk`)로 자동화·배치 처리 스크립트를 둡니다.
+Mobu 2025 `pyfbsdk` 자동화·배치 스크립트. **실행은 Mobu 내부** — Cursor venv는 편집·autocomplete 전용.
 
-## 규칙
+---
 
-- 파일명·식별자: ASCII
-- 주석: 한국어
-- 스크립트 상단에 Mobu 버전·실행 방법(메뉴/단축키) 기록
-- **실행은 Mobu 내부** — Cursor venv는 편집·자동완성 전용
+## Inventory
 
-## 목록
+| Path | What | Run |
+|------|------|-----|
+| [vendor/retargeter/retargeter.py](vendor/retargeter/retargeter.py) | [Retargeter](https://github.com/eksod/Retargeter) — FBX batch retarget | Python Editor · **vendor copy only** |
+| [vendor/](vendor/README.md) | external GitHub repos | see vendor guide |
 
-| 스크립트 | 설명 | 상태 |
-|----------|------|------|
-| [vendor/retargeter/retargeter.py](vendor/retargeter/retargeter.py) | [eksod/Retargeter](https://github.com/eksod/Retargeter) — FBX 폴더 일괄 merge·retarget | Python Editor Execute (Scripts에 원본 `main()` 넣지 말 것) |
-| [vendor/](vendor/README.md) | GitHub 외부 repo 추가·연결 | |
+Tool catalog: [external-tools.md](../external-tools.md)
 
-외부 도구 카탈로그: [external-tools.md](../external-tools.md)
+---
 
-## Mobu에서 실행
+## Run in Mobu
 
-| 방법 | 설명 |
-|------|------|
+| Method | |
+|--------|---|
 | Python Editor | `Window` → `Python Editor` → Open → Execute |
-| Scripts 메뉴 | `bin\config\Scripts\` — [installation.md](../installation.md) |
-| Cursor Utils (선택) | [MotionBuilder Utils](../external-tools.md#motionbuilder-utils-실행디버그) — Ctrl+Enter |
+| Scripts menu | `bin\config\Scripts\` — [installation.md](../installation.md) |
+| Cursor Utils | [MotionBuilder Utils](../external-tools.md#motionbuilder-utils-실행디버그) — Ctrl+Enter |
 
-## Cursor / 스텁 · Mobu 경로
+Path · stub · `setup-dev.ps1`: **[installation.md](../installation.md)** (single source)
 
-InstallPath, Scripts 폴더, `setup-dev.ps1`, Pylance 스텁 — **[installation.md](../installation.md)** (단일 출처).
+---
 
-## 스크립트 템플릿
+## Conventions
+
+- 파일명·식별자: ASCII · 주석: 한국어
+- 스크립트 상단: Mobu version · 실행 방법
+
+## Template
 
 ```python
 # Mobu 2025 — 설명 한 줄
-# 실행: Window → Python Editor → Execute / Scripts 메뉴
+# 실행: Window → Python Editor → Execute
 
-from pyfbsdk import *  # noqa: F403 — Mobu 내부 전용
+from pyfbsdk import *  # noqa: F403
 
 def main() -> None:
-    pass  # 본문
+    pass
 
 if __name__ in ("__main__", "__builtin__"):
     main()
 ```
 
-## 관련
+---
 
-- [installation.md](../installation.md) — 경로·스텁·Mobu 연결
-- [vendor/README.md](vendor/README.md) — GitHub 코드 추가
-- [external-tools.md](../external-tools.md) — Retargeter, OpenMoBu
-- [workflows/retargeting-cleanup.md](../workflows/retargeting-cleanup.md) — 수동 클린업 파이프
+## Links
+
+- [installation.md](../installation.md) · [vendor/README.md](vendor/README.md)
+- [retargeting-cleanup.md](../workflows/retargeting-cleanup.md)

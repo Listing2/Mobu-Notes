@@ -1,8 +1,14 @@
-# Unity 연동 (라이브)
+# Unity — Live
 
-Unity **실시간** 수신·동기화·네트워크 (Mobu 라이브 sync, VMC, OSC).
+Unity **real-time** 수신·sync · network (Mobu live stream, VMC, OSC).
 
-- [sync.md](sync.md)
-- [ports.md](ports.md)
+---
 
-FBX 클린업 후 import: [post/unity-import.md](../../post/unity-import.md)
+## Docs
+
+| Doc | What |
+|-----|------|
+| [sync.md](sync.md) | live sync |
+| [ports.md](ports.md) | ports · firewall |
+
+**Post (FBX):** cleanup animation import → [post/unity-import.md](../../post/unity-import.md)
