@@ -15,22 +15,13 @@
 [live]  모캡 → Mobu 송출 → Unity 실시간 → OBS / 방송
 ```
 
-## 빠른 링크
+## 시작하기
 
-### post — 후처리
-
-- [리타게팅 개념](post/workflows/retargeting-fundamentals.md)
-- [클린업 실무 절차](post/workflows/retargeting-cleanup.md)
-- [Mobu 설치 경로 · Scripts](post/installation.md)
-- [외부 Python 도구](post/external-tools.md)
-- [AI · 코딩 클린업](post/ai-motion-cleanup.md)
-
-### live — 라이브·방송
-
-- [파이프라인 개요](live/pipeline/overview.md)
-- [프레임레이트 정책](live/motionbuilder/framerate-policy.md)
-- [지터 1차 점검](live/troubleshooting/jitter.md)
-- [방송 전 체크리스트](live/checklists/pre-broadcast-mocap.md)
+| 업무 | 진입점 |
+|------|--------|
+| FBX 후처리 | [post/workflows/](post/workflows/) |
+| 라이브·방송 | [live/](live/) |
+| Mobu 설치·스크립트 | [post/installation.md](post/installation.md) |
 
 ## 작성 규칙
 

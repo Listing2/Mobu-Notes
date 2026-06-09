@@ -1,0 +1,2 @@
+# vendor 폴더 — 외부 GitHub 스크립트 보관
+# 개별 repo는 git submodule 또는 수동 복사. README: vendor/README.md

@@ -21,15 +21,16 @@ AI mocap 도입 시에도 “캡처만 AI, **가공은 Mobu post**” 구조가 
 
 AI가 아니지만 **가장 많이 쓰는 자동화**. Control Rig bake **전·후** 보조.
 
+- **도구 목록:** [external-tools.md](external-tools.md) (Retargeter, MotionScriptTools, 발 스크립트 등)
+- **repo 추가·실행:** [scripts/vendor/README.md](scripts/vendor/README.md)
+- **Mobu 경로·스텁:** [installation.md](installation.md)
+
+추가 참고 (카탈로그 미포함):
+
 | 리소스 | 링크 | 용도 |
 |--------|------|------|
-| Foot sliding 스크립트 | [Nils Söderman](https://nilssoderman.com/code/motionbuilder-foot-sliding) | 발 effector 키 고정 |
 | Stop Foot Sliding | [Vic DeBaie](http://www.vicdebaie.com/blog/stop-foot-sliding-with-motionbuilder-and-python/) | 레이어·참조 프레임 |
-| 발 FCurve / 접지 | [MotionScriptTools 노트](https://alinen.github.io/MotionScriptTools/notes/MotionBuilderFootScripts.html) | ToesToFloor, 접지 export |
 | mocap 파이프라인 | [MotionBuilder-Pipeline-Scripts](https://github.com/SoerenFrohne/MotionBuilder-Pipeline-Scripts) | 클립 배치·캐릭터 셋업 |
-| 배치 retarget | [Retargeter](https://github.com/eksod/Retargeter) | [external-tools.md](external-tools.md) |
-
-→ `post/scripts/`에 래핑·vendor 후 Mobu `bin\config\Scripts` 연결 — [installation.md](installation.md)
 
 ---
 
@@ -99,10 +100,9 @@ Mobu에 **직접 플러그인** 형태로 붙는 경우는 드물다. 보통 **P
 
 ## 5. 우선 탐색 순서
 
-1. [Retargeter](https://github.com/eksod/Retargeter) + [발 스크립트 노트](https://alinen.github.io/MotionScriptTools/notes/MotionBuilderFootScripts.html) — Mobu 안에서
+1. [external-tools.md](external-tools.md) + [vendor/README.md](scripts/vendor/README.md) — Mobu Python·배치 retarget
 2. [UnderPressure](https://github.com/InterDigitalInc/UnderPressure) — foot skate ML (`demo.py`)
 3. [StableMotion 논문](https://arxiv.org/html/2505.03154v1) — unpaired cleanup 방향
-4. [awesome-motionbuilder](https://github.com/matthewkapfhammer/awesome-motionbuilder) — 추가 repo·튜토리얼
 
 ---
 

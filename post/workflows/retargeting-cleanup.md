@@ -118,6 +118,7 @@ Control Rig 컨트롤이 활성화되면 Phase 4로.
 
 - Reach / Hand IK로 그립·터치 위치.
 - Neck/Head FK로 look 방향 미세 조정 (시네머신 연동 시 과도한 head key는 피할 수 있음).
+- **구간 Override (주먹·그립·목 과꺾임):** Animation Layer + Weight — [layer-override-hands-head.md](layer-override-hands-head.md).
 
 ### 4.3 Spine / Hip
 

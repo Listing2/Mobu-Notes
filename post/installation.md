@@ -54,6 +54,10 @@ New-Item -ItemType SymbolicLink -Path "$MobuScripts\MyTool.py" `
 
 [MotionBuilder Utils](external-tools.md#cursor--vscode-연동) 확장: Cursor에서 **Ctrl+Enter**로 Mobu에 코드 전송·디버그 attach.
 
+### 방법 D — vendor (GitHub 외부 repo)
+
+외부 `.py`는 `post/scripts/vendor/` — [vendor/README.md](../scripts/vendor/README.md) (복사 / submodule / symlink).
+
 ## Cursor / Pylance 스텁 (편집 전용)
 
 Mobu 안의 `pyfbsdk`는 **Mobu 프로세스 안에서만** import 가능하다.  
