@@ -20,7 +20,7 @@ MotionBuilder에서 캐릭터·모션을 다루는 절차별 문서.
 ## 기록할 때 포함할 항목
 
 - MotionBuilder 버전 (2025)
-- 소스 모션 출처 (OptiTrack, 파일명, fps)
+- 소스 모션 출처 (모캡 프로그램, 파일명, fps)
 - 타겟 캐릭터 (리그 타입, export 툴)
 - Retarget (Match Source, 스케일)
 - Plot 옵션 (reducer, root translation)

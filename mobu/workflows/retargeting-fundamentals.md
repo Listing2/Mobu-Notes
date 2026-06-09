@@ -47,7 +47,7 @@ merge/import 직후, Retarget 전에 아래를 확인한다. 여기서 틀어지
 
 ### 2.3 본 이름 · 계층 · rest pose
 
-- OptiTrack·Maya·Blender·VRM converter마다 본 이름이 다르다.
+- 모캡 프로그램·DCC·캐릭터 변환 툴마다 본 이름이 다르다.
 - Characterize 시 **Auto Map**이 실패하면 수동으로 LeftArm → LeftArm 등 매핑.
 - **Rest pose** (T-pose / A-pose)가 소스·타겟에서 다르면 Retarget 첫 프레임부터 팔·어깨가 꺾인다.
 
