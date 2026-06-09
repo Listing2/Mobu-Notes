@@ -112,7 +112,8 @@ vendor 코드를 **수정**하면 upstream과 diverge — 가능하면 **래퍼*
 |------|------|-----------|----------|
 | 1 | [Retargeter](https://github.com/eksod/Retargeter) | `vendor/retargeter/retargeter.py` | Python Editor → Execute |
 | 2 | [MotionScriptTools](https://github.com/alinen/MotionScriptTools) `/motion_builder` | 필요 `.py`만 복사 | foot 등 |
-| 3 | [OpenMoBu](https://github.com/Neill3d/OpenMoBu) | submodule 또는 Release 플러그인 | PythonScripts / bin |
+| 3 | [OpenMoBu](https://github.com/Neill3d/OpenMoBu) | submodule 또는 Release 플러그인 | ReCreateRig, StayOnFloor 등 |
+| 4 | [ebadier/MotionBuilder-Tools](https://github.com/ebadier/MotionBuilder-Tools) | 필요 `.py`만 | 씬·애니 유틸 |
 
 전체 목록: [external-tools.md](../../external-tools.md). ML·실험: [ai-motion-cleanup.md](../../ai-motion-cleanup.md).
 
@@ -140,8 +141,8 @@ Mobu → `Window` → `Python Editor` → `vendor/retargeter/retargeter.py` Open
 
 | 프로젝트 | URL | vendor 경로 | 라이선스 | Mobu 실행 |
 |----------|-----|-------------|----------|-----------|
-| Retargeter | https://github.com/eksod/Retargeter | `vendor/retargeter/` | as-is (README) | |
-| OpenMoBu | https://github.com/Neill3d/OpenMoBu | `vendor/openmobu/` | repo LICENSE | |
+| Retargeter | https://github.com/eksod/Retargeter | `vendor/retargeter/` | as-is (README) | Python Editor / `Scripts\Retargeter.py` |
+| OpenMoBu | https://github.com/Neill3d/OpenMoBu | Release 또는 `PythonScripts/` | repo LICENSE | ReCreateRig, StayOnFloor 등 |
 | | | | | |
 
 ---
