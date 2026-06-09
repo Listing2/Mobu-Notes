@@ -17,12 +17,13 @@
 
 | 경로 | 내용 |
 |------|------|
-| [workflows/](workflows/) | 리타게팅·클린업 절차 (**읽는 순서** 포함) |
+| [workflows/retargeting-cleanup.md](workflows/retargeting-cleanup.md) | **실무 12단계** · Phase 0~6 |
+| [workflows/](workflows/) | 개념·Layer · [목록](workflows/README.md) |
 | [installation.md](installation.md) | Mobu 경로 · Cursor 스텁 · Scripts 연결 |
 | [scripts/](scripts/) | Python · [vendor/](scripts/vendor/README.md) |
 | [external-tools.md](external-tools.md) | Retargeter, OpenMoBu 등 |
 | [ai-motion-cleanup.md](ai-motion-cleanup.md) | AI · ML 클린업 옵션 |
 
-## 한 줄 요약
+## 진입
 
-Characterize → Retarget(Match Source Off) → Control Rig 클린업 → Skeleton plot → FBX export
+일상 작업: [retargeting-cleanup.md — 실무 12단계](workflows/retargeting-cleanup.md#실무-순서--animation-layer-파이프-권장)
