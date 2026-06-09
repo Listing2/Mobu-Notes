@@ -1,6 +1,6 @@
-# Unity 동기화 (MobuNetworkSync)
+# Unity 동기화 (Mobu 라이브 수신)
 
-MolistBase6 기준 메모. 코드 경로는 사내 저장소 참고.
+Unity 런타임 기준 메모. 프로젝트별 수신 컴포넌트·설정은 각 Unity 프로젝트 저장소 참고.
 
 ## 핵심 개념
 

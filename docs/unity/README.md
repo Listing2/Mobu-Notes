@@ -1,6 +1,6 @@
 # Unity 연동
 
-MolistBase6 / NGO / Mobu 수신 쪽 정리.
+Unity 수신·동기화·네트워크 (Mobu 라이브 sync, VMC, OSC).
 
 - [sync.md](sync.md)
 - [ports.md](ports.md)

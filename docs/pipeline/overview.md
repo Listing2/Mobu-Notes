@@ -7,7 +7,7 @@
     ↓
 MotionBuilder (리타겟·정리·송출)
     ↓
-Unity (MobuNetworkSync / VMC / OSC)
+Unity (라이브 sync / VMC / OSC)
     ↓
 방송 카메라·캐릭터·UI
     ↓
@@ -20,7 +20,7 @@ OBS / 캡처보드 / Spout·NDI
 |------|------|-----------|
 | 원본 캡처 fps | 모캡 PC / 볼륨 | [framerate-policy.md](../motionbuilder/framerate-policy.md) |
 | Mobu 송출 fps | MotionBuilder | [motionbuilder/](..) |
-| Unity 수신·보간 | MolistBase6 | [unity/sync.md](../unity/sync.md) |
+| Unity 수신·보간 | Unity PC / 수신 앱 | [unity/sync.md](../unity/sync.md) |
 | 네트워크 포트 | 아바타별 OSC/VMC | [unity/ports.md](../unity/ports.md) |
 
 ## 원칙

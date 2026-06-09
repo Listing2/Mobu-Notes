@@ -8,7 +8,7 @@
 
 - 날짜:
 - MotionBuilder 버전:
-- Unity / MolistBase6 브랜치:
+- Unity 프로젝트 / 브랜치:
 - 원본 캡처 fps:
 - Mobu 송출 fps:
 - 동시 인원:
