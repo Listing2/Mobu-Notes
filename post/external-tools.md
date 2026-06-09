@@ -3,6 +3,8 @@
 Mobu 2025 리타게팅·클린업·Python 스크립트 작성에 쓸 만한 **외부 리소스** 정리.  
 본 저장소에 코드를 vendoring하지 않고, 링크·도입 메모만 둔다.
 
+**AI · ML 클린업 옵션:** [ai-motion-cleanup.md](ai-motion-cleanup.md)
+
 ## 우선순위 요약
 
 | 우선 | 저장소 | 용도 |
@@ -124,6 +126,7 @@ Mobu 실행 파일 경로: [installation.md](installation.md).
 [수동] retargeting-cleanup → Phase 4~6 Control Rig · export
 [참고] OpenMoBu            → characterize · plot 스크립트
 [개발] stubs + Utils       → post/scripts/ 작성
+[ML/AI]  ai-motion-cleanup → 실험·참고
 [학습] awesome-motionbuilder · MotionScriptTools foot 노트
 ```
 

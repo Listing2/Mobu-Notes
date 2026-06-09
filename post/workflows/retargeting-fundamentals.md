@@ -240,7 +240,8 @@ Mobu 작업의 **최종 산출물** 정의. Unity는 그 다음 단계.
 ```
 
 **FBX 애니메이션 정설:** 3번까지 Mobu에서 해결하는 것이 맞다.  
-5번은 import 설정 이슈 — [unity-import.md](../unity-import.md).
+5번은 import 설정 이슈 — [unity-import.md](../unity-import.md).  
+ML·스크립트 보조 옵션 — [ai-motion-cleanup.md](../ai-motion-cleanup.md).
 
 ---
 
@@ -277,3 +278,4 @@ Mobu 작업의 **최종 산출물** 정의. Unity는 그 다음 단계.
 
 - [retargeting-cleanup.md](retargeting-cleanup.md) — 단계별 실무 절차·체크리스트
 - [unity-import.md](../unity-import.md) — Unity FBX import (Foot Sliding 등)
+- [ai-motion-cleanup.md](../ai-motion-cleanup.md) — AI · ML · 코딩 클린업
