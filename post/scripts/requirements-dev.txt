@@ -1,0 +1,2 @@
+# Cursor / VS Code에서 pyfbsdk 자동완성용 (Mobu 내부 실행과 별개)
+motionbuilder-stubs==2025.*

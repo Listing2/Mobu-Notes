@@ -154,7 +154,7 @@ Control Rig 컨트롤이 활성화되면 Phase 4로.
 3. take / animation stack에 plot된 take가 있는지 확인.
 4. export 옵션·fps·unit 기록.
 
-Unity import 시 foot sliding 등은 [animation-import-fbx.md](../../docs/unity/animation-import-fbx.md).
+Unity import 시 foot sliding 등은 [unity-import.md](../unity-import.md).
 
 ---
 
@@ -184,7 +184,7 @@ Unity import 시 foot sliding 등은 [animation-import-fbx.md](../../docs/unity/
 
 ### Unity (downstream)
 
-- [ ] [animation-import-fbx.md](../../docs/unity/animation-import-fbx.md) 설정
+- [ ] [unity-import.md](../unity-import.md) 설정
 - [ ] Foot sliding 없음
 - [ ] Timeline / Cinemachine 연동
 
@@ -217,4 +217,4 @@ Unity import 시 foot sliding 등은 [animation-import-fbx.md](../../docs/unity/
 ## 관련 문서
 
 - [retargeting-fundamentals.md](retargeting-fundamentals.md) — 개념·옵션·원인
-- [animation-import-fbx.md](../../docs/unity/animation-import-fbx.md) — Unity import
+- [unity-import.md](../unity-import.md) — Unity import

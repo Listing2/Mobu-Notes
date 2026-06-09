@@ -1,6 +1,6 @@
 # 워크플로
 
-MotionBuilder에서 캐릭터·모션을 다루는 절차별 문서.
+MotionBuilder **후처리(post)** — 캐릭터·모션 FBX 절차. 라이브 송출: [live/](../../live/).
 
 ## 목록
 
@@ -20,7 +20,7 @@ MotionBuilder에서 캐릭터·모션을 다루는 절차별 문서.
 
 1. [retargeting-fundamentals.md](retargeting-fundamentals.md) — 왜 그렇게 하는지
 2. [retargeting-cleanup.md](retargeting-cleanup.md) — 실제 작업 순서
-3. [animation-import-fbx.md](../../docs/unity/animation-import-fbx.md) — Unity import
+3. [unity-import.md](../unity-import.md) — Unity import
 
 ## 기록할 때 포함할 항목
 

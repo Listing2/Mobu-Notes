@@ -4,13 +4,15 @@ Desktop.ini
 .DS_Store
 
 # Editor
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
 *.swp
 *~
 
 # Local / sensitive (do not commit)
-docs/private/
+live/private/
 *.local.md
 .env
 *.key
@@ -18,3 +20,6 @@ docs/private/
 # MotionBuilder temp / backup
 *.bak
 *.tmp
+
+# Python venv (Mobu pyfbsdk 스텁 — Cursor/Pylance용)
+post/scripts/.venv/

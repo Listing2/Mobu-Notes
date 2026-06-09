@@ -4,7 +4,7 @@ Mobu에서 plot·export한 FBX를 Unity에 넣을 때의 설정.
 **발 sliding 등 모션 품질 1차 해결은 Mobu Control Rig**에서 하는 것이 정석이다.  
 Unity 쪽은 import·압축·Humanoid 매핑 이슈를 다룬다.
 
-Mobu 작업 절차: [mobu/workflows/retargeting-cleanup.md](../../mobu/workflows/retargeting-cleanup.md)
+Mobu 작업 절차: [workflows/retargeting-cleanup.md](workflows/retargeting-cleanup.md)
 
 ---
 
@@ -16,7 +16,7 @@ Mobu에서 정리했는데 Unity에서 **발이 미끄러지는** 경우.
 
 | 계층 | 확인 |
 |------|------|
-| Mobu | 스케일·Control Rig foot IK·plot reducer — [fundamentals §10](../../mobu/workflows/retargeting-fundamentals.md#10-foot-sliding--원인-계층) |
+| Mobu | 스케일·Control Rig foot IK·plot reducer — [fundamentals §10](workflows/retargeting-fundamentals.md#10-foot-sliding--원인-계층) |
 | Unity | Anim compression / error tolerance로 **키가 줄거나 보간이 달라짐** |
 
 ### FBX Import — Animation 탭
