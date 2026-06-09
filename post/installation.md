@@ -30,8 +30,8 @@ MotionBuilder 2025\
 
 | 폴더 | 용도 |
 |------|------|
-| `bin\config\PythonStartup` | Mobu **시작할 때마다** 실행되는 Python (단축키·툴 UI 등) |
-| `bin\config\Scripts` | **Python Tools** 메뉴에서 고르는 스크립트 |
+| `bin\config\PythonStartup` | Mobu **시작할 때마다** 실행되는 Python (단축키·툴 UI 등) — **임의 .py 넣지 말 것** |
+| `bin\config\Scripts` | **Python Tools** 메뉴 스크립트 — `main()`이 파일 끝에 **무조건** 있으면 시작·로드 시 크래시 가능 |
 | `bin\x64\python\python.exe` | Mobu가 실제로 돌리는 인터프리터 — **Cursor venv와 별개** |
 | 본 저장소 `post/scripts/` | Git으로 관리하는 스크립트 원본 — Mobu에 **복사·심볼릭 링크·PYTHONPATH**로 연결 |
 
@@ -46,15 +46,22 @@ New-Item -ItemType SymbolicLink -Path "$MobuScripts\MyTool.py" `
   -Target "E:\Projects\Repositories\Mobu-Notes\post\scripts\MyTool.py"
 ```
 
-### 방법 B — Python Editor에서 직접 실행
+### 방법 B — Python Editor에서 직접 실행 (Retargeter 권장)
 
-`Window` → `Python Editor` → `Open` → `post/scripts/` 아래 `.py` → Execute (F5).
+`Window` → `Python Editor` → `Open` → `post/scripts/vendor/retargeter/retargeter.py` → Execute (F5).
 
-### 방법 C — Mobu에서 Cursor로 실행 (선택)
+upstream [Retargeter](https://github.com/eksod/Retargeter) 원본은 맨 아래 `main()`만 있어 **Scripts 폴더에 그대로 두면 Mobu가 안 켜질 수 있음**.  
+본 저장소 vendor copy는 `if __name__ in ("__main__", "__builtin__"):` 로 감쌈 — Scripts에 넣을 때도 **vendor copy** 사용.
 
-[MotionBuilder Utils](external-tools.md#cursor--vscode-연동) 확장: Cursor에서 **Ctrl+Enter**로 Mobu에 코드 전송·디버그 attach.
+### 방법 C — Python Editor (기타 스크립트)
 
-### 방법 D — vendor (GitHub 외부 repo)
+`post/scripts/` 아래 `.py` → Open → Execute.
+
+### 방법 D — Mobu에서 Cursor로 실행 (선택)
+
+[MotionBuilder Utils](external-tools.md#motionbuilder-utils-실행디버그) 확장: Cursor에서 **Ctrl+Enter**로 Mobu에 코드 전송·디버그 attach.
+
+### 방법 E — vendor (GitHub 외부 repo)
 
 외부 `.py`는 `post/scripts/vendor/` — [vendor/README.md](../scripts/vendor/README.md) (복사 / submodule / symlink).
 

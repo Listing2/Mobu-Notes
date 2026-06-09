@@ -126,14 +126,21 @@ vendor 코드를 **수정**하면 upstream과 diverge — 가능하면 **래퍼*
 
 ### 도입 체크리스트
 
-- [ ] `retargeter.py` → `vendor/retargeter/` 또는 Mobu `bin\config\Scripts` (아래 방법 1~3)
+- [ ] `retargeter.py` → `vendor/retargeter/` (**vendor copy** — `main()` 가드 있음)
+- [ ] `Downloads\retargeter.py` 원본을 Scripts에 **그대로 두지 않기** (Mobu 시작 실패)
 - [ ] 타겟 Retarget Reach/Offset 튜닝 후 캐릭터 저장
 - [ ] 테스트 FBX 2~3개로 Match Source·스케일 확인
 - [ ] 배치 결과 → [retargeting-cleanup.md](../../workflows/retargeting-cleanup.md) Phase 4~6
 
 ### 실행
 
-Mobu → `Window` → `Python Editor` → `vendor/retargeter/retargeter.py` Open → Execute.
+Mobu 2025 → `Window` → `Python Editor` → **`vendor/retargeter/retargeter.py`** (또는 패치된 `Downloads\retargeter.py`) Open → **Execute (F5)**.
+
+| 패치 (upstream 대비) | 내용 |
+|----------------------|------|
+| Python 3 | `print()`, `.items()`, 경로 `os.path.join` |
+| 시작 크래시 방지 | `if __name__ ...` + Scripts에 **원본** `main()` 금지 |
+| 팝업 값 | `_popup_str()` — Hips/Prefix 입력 |
 
 ---
 
@@ -141,7 +148,7 @@ Mobu → `Window` → `Python Editor` → `vendor/retargeter/retargeter.py` Open
 
 | 프로젝트 | URL | vendor 경로 | 라이선스 | Mobu 실행 |
 |----------|-----|-------------|----------|-----------|
-| Retargeter | https://github.com/eksod/Retargeter | `vendor/retargeter/` | as-is (README) | Python Editor / `Scripts\Retargeter.py` |
+| Retargeter | https://github.com/eksod/Retargeter | `vendor/retargeter/` | as-is (README) | Python Editor · vendor copy만 |
 | OpenMoBu | https://github.com/Neill3d/OpenMoBu | Release 또는 `PythonScripts/` | repo LICENSE | ReCreateRig, StayOnFloor 등 |
 | | | | | |
 

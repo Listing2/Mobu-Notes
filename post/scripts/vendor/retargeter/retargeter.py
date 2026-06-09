@@ -21,6 +21,9 @@ eduardo.simioni@gmail.com
 http://www.eksod.com
 """
 
+# Mobu 2025 (Python 3) — eksod/Retargeter vendor patch
+# 실행: Python Editor → Open → Execute (F5). Scripts 폴더에 원본 main() 그대로 두지 말 것.
+
 import os
 import re
 from pyfbsdk import *
@@ -264,6 +267,27 @@ mobuMap = {'Reference' : 'reference',
              'RightArmRoll' : 'RightArmRoll',
              'RightForeArmRoll' : 'RightForeArmRoll' }
 
+def _popup_str(value, default=""):
+    """FBMessageBoxGetUserValue → str (Mobu 2024/2025)"""
+    if value is None:
+        return default
+    if isinstance(value, str):
+        return value
+    try:
+        n = len(value)
+        if n > 1:
+            return str(value[1])
+        if n == 1:
+            return str(value[0])
+    except TypeError:
+        pass
+    return str(value)
+
+
+def _join_path(folder, name):
+    return os.path.join(folder, name)
+
+
 def addJointToCharacter ( characterObject, slot, jointName ):    
     myJoint = FBFindModelByName(jointName)
     if myJoint:
@@ -306,7 +330,7 @@ def CharacterizeBiped(rootname, useBipedPrefixNamingScheme, nameprefix, boneMap,
     progresssteps = len(boneMap)
 
     # assign Biped to Character Mapping.
-    for pslot, pjointName in boneMap.iteritems():
+    for pslot, pjointName in boneMap.items():
         if not pjointName:
             addJointToCharacter (myBiped, pslot, namespace + rootname)
         else:
@@ -316,7 +340,7 @@ def CharacterizeBiped(rootname, useBipedPrefixNamingScheme, nameprefix, boneMap,
         fbp.Percent = int(val)
                 
     switchOn = myBiped.SetCharacterizeOn( True )    
-    print "Character mapping created for " + (myBiped.LongName)
+    print("Character mapping created for " + myBiped.LongName)
         
     # We must call FBDelete when the FBProgress object is no longer needed.
     fbp.FBDelete()
@@ -332,8 +356,7 @@ def plotAnim(char, animChar):
     Receives two characters, sets the input of the first character to the second
     and plot. Return ploted character.
     """
-    if char.GetCharacterize:
-        switchOn = char.SetCharacterizeOn(True)
+    char.SetCharacterizeOn(True)
 
     plotoBla = FBPlotOptions()
     plotoBla.ConstantKeyReducerKeepOneKey = True
@@ -398,8 +421,8 @@ def main():
         # Using os to get the file names from the specified folder (above) and storing names of files in a list
         allList = os.listdir(oldAnimsPopup.Path)
         # Setting the regular expression to only look for .fbx or .bvh extenstion
-        fbxRE = re.compile('^\w+.fbx$', re.I)
-        bvhRE = re.compile('^\w+.bvh$', re.I)
+        fbxRE = re.compile(r'^[\w\-. ]+\.fbx$', re.I)
+        bvhRE = re.compile(r'^[\w\-. ]+\.bvh$', re.I)
         # Removing any files that do not have an .fbx extenstion
         for fname in allList:
             mo = fbxRE.search(fname)
@@ -414,15 +437,15 @@ def main():
     # get root name from the skeleton on the animations folder
     nomenclature = FBMessageBox( "Animations nomenclature", "The skeleton on the animations folder follow which nomenclature?", "Motionbuilder" , "3dsMax Biped", "Cancel" )
     if nomenclature == 1:
-        userRoot = FBMessageBoxGetUserValue( "Hips/Pelvis", "Please type exact name of hips node on the animations:", "Hips", FBPopupInputType.kFBPopupString, "Ok" )
+        userRoot = _popup_str(FBMessageBoxGetUserValue( "Hips/Pelvis", "Please type exact name of hips node on the animations:", "Hips", FBPopupInputType.kFBPopupString, "Ok" ), "Hips")
         boneMap = mobuMap
-        bipedPrefixNamingScheme = False
-        prefix = FBMessageBoxGetUserValue( "Prefix to nomenclature", "Please input the prefix used on the skeleton. Leave empty if none.", "", FBPopupInputType.kFBPopupString, "Ok" )
+        use_biped_prefix = False
+        prefix = _popup_str(FBMessageBoxGetUserValue( "Prefix to nomenclature", "Please input the prefix used on the skeleton. Leave empty if none.", "", FBPopupInputType.kFBPopupString, "Ok" ), "")
     elif nomenclature == 2:
-        userRoot = FBMessageBoxGetUserValue( "Hips/Pelvis", "Please type exact name of hips/pelvis node on the animations:", "Bip01", FBPopupInputType.kFBPopupString, "Ok" )
+        userRoot = _popup_str(FBMessageBoxGetUserValue( "Hips/Pelvis", "Please type exact name of hips/pelvis node on the animations:", "Bip01", FBPopupInputType.kFBPopupString, "Ok" ), "Bip01")
         boneMap = bipedMap
-        bipedPrefixNamingScheme = True
-        prefix = ["",""] # so we can use prefix variable for both cases
+        use_biped_prefix = True
+        prefix = ""
     else:
         FBMessageBox( "Nomenclature selection canceled", "Bones must follow either Motionbuilder or 3dsMax Biped nomenclature. You can edit or add your own inside the script (line 160).", "OK", None, None )
         return False
@@ -444,9 +467,9 @@ def main():
             # setup load/merge options
             lOptions = FBFbxOptions(True) # true = load options
             lOptions.CustomImportNamespace = "merged"
-            app.FileMerge(oldAnimsPopup.Path + "\\" + animName, False, lOptions)
+            app.FileMerge(_join_path(oldAnimsPopup.Path, animName), False, lOptions)
         else:
-            app.FileImport(oldAnimsPopup.Path + "\\" + animName, False) # False means it will create objects regardless
+            app.FileImport(_join_path(oldAnimsPopup.Path, animName), False) # False means it will create objects regardless
 
 
         # if there's no character in the merged animation scene we need to characterize it
@@ -455,17 +478,17 @@ def main():
             # find root model to pass to CharacterizeBiped()
             # if merging FBX, it has custom namespace
             if fileFormat == ".fbx":
-                oldAnimRoot = FBFindModelByName("merged:" + prefix[1] + userRoot[1])
+                oldAnimRoot = FBFindModelByName("merged:" + prefix + userRoot)
             # if importing BVH, it will have it's own BVH: namespace
             else:
-                oldAnimRoot = FBFindModelByName("BVH:" + prefix[1] + userRoot[1])
+                oldAnimRoot = FBFindModelByName("BVH:" + prefix + userRoot)
                 
             if not oldAnimRoot:
                 FBMessageBox( "Could not find hips object", "Check opened scene. Root node name must be given without namespace.", "OK", None, None )
                 return False
 
             # characterize imported animation with modified 3dsmaxbipedtemplate.py
-            oldAnimChar = CharacterizeBiped(userRoot[1], bipedPrefixNamingScheme, prefix[1], boneMap, oldAnimRoot)
+            oldAnimChar = CharacterizeBiped(userRoot, use_biped_prefix, prefix, boneMap, oldAnimRoot)
             
         else:
             # merged FBX with an character present in the scene
@@ -473,6 +496,8 @@ def main():
 
         # plot
         charToSave = plotAnim(newChar, oldAnimChar)
+        if not charToSave:
+            return False
 
         # setup save options (for some reason, they were not working outside this loop...)
         sOptions = FBFbxOptions(False) # false = save options
@@ -483,11 +508,18 @@ def main():
         sOptions.ShowOptionsDialog = False
         
         # Saves out the character and rig animation
-        app.SaveCharacterRigAndAnimation(newCharPopup.Path + "\\" + animName, charToSave, sOptions)
+        out_path = _join_path(newCharPopup.Path, animName)
+        app.SaveCharacterRigAndAnimation(out_path, charToSave, sOptions)
         if fileFormat != ".fbx":
             animName += ".fbx" # leaving .bvh and adding .fbx, so File saved: is printed correctly
-        print "File saved: " + newCharPopup.Path + "\\" + animName
+        print("File saved: " + out_path)
 
 
-main()
-del(bipedPrefixNamingScheme, bipedMap, mobuMap)
+def run_retargeter():
+    """Python Editor F5 / Tools 메뉴 진입점"""
+    return main()
+
+
+if __name__ in ("__main__", "__builtin__"):
+    run_retargeter()
+    del (bipedPrefixNamingScheme, bipedMap, mobuMap)

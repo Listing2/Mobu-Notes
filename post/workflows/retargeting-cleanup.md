@@ -9,26 +9,43 @@
 ## 전체 흐름
 
 ```text
-VRM or FBX 캐릭터
-    ↓ (툴로 FBX export)
-MotionBuilder — 타겟 characterize + Reference pose 확인
-    ↓
-원본 모션 FBX merge (fps·축 확인)
-    ↓
-모션 스켈레톤 characterize (소스) + Mapping 확인
-    ↓
-스케일을 모션(소스)에 맞춤
-    ↓
-Retarget — Match Source Off, 라이브처럼 프리뷰
-    ↓
-Bake / Plot to Control Rig
-    ↓
-Control Rig — foot / hand / spine 클린업
-    ↓
-Bake / Plot to Skeleton
-    ↓
-FBX export → Unity / Timeline / Cinemachine
+타겟 characterize → 모션 merge·retarget → Plot to CR → CR 클린업(Layer·발) → Plot to Skeleton → FBX → Unity
 ```
+
+**일상 작업 순서(12단계):** [실무 순서 — Animation Layer 파이프](#실무-순서--animation-layer-파이프-권장)  
+**개념:** [retargeting-fundamentals.md](retargeting-fundamentals.md)
+
+---
+
+## 실무 순서 — Animation Layer 파이프 (권장)
+
+모션 FBX open → 캐릭터 merge → Source retarget → **Plot to CR** → **CR Animation Layer** → Plot to Skeleton → Unity.  
+Phase 번호와 1:1 대응은 아래 표 참고.
+
+| # | 할 일 | Phase | 주의 (흔한 실수) |
+|---|--------|-------|------------------|
+| 1 | **모션-only FBX** open / merge | 1 | RT 풀 export 재merge 금지 |
+| 2 | **타겟 캐릭터** merge + characterize + Reference pose | 0 | VRM 변환본 어깨·T-pose 확인 |
+| 3 | **모션** characterize → 타겟 **Source**에 연결 | 1~2 | Mapping·0프레임 pose |
+| 4 | Definition **스케일**을 모션(액터)에 맞춤 (예: 1.3) | 2.1 | Plot **전** 발·손 reach 몇 프레임 확인 |
+| 5 | **Match Source Off** · Live Retarget **프리뷰** | 2.2~2.3 | Plot 전 큰 문제는 여기서 해결 |
+| 6 | **Hand IK T/R 100 올리지 않기** (Plot 전) | 2 | Plot 전 IK 100 = 손목 drift 씨앗 → [§ Hand IK](#hand-ik--animation-layer-타이밍) |
+| 7 | **Plot to Control Rig** (전신+손가락, Reducer Off) | 3 | Base 레이어 = Plot 결과 그대로 |
+| 8 | **소스 캐릭터 제거** · Source/Relation **Off** | 3~4 | 소스 남으면 Layer와 finger curve 싸움 |
+| 9 | **Animation Layer** on CR — Finger FK · Weight | 4.2 | [layer-override-hands-head.md](layer-override-hands-head.md) |
+| 10 | 발 **Foot IK** (필요 시) | 4.1 | 발 sliding은 Layer 비추 |
+| 11 | **Plot to Skeleton** (Reducer Off) | 5 | Layer·CR 만족 **후** 한 번만 |
+| 12 | FBX export (skeleton anim) → Unity | 6 | CR·소스·mesh 불필요 시 제외 |
+
+### Hand IK × Animation Layer — 타이밍
+
+| 단계 | Hand IK | Animation Layer |
+|------|---------|-----------------|
+| Plot **전** (Live Retarget) | **0~낮게** — Reach만 필요 시 구간별 | 쓰지 않음 |
+| Plot **후** (CR 클린업) | 그립 **hold 구간만** 필요하면 켜되, **FK finger와 동시 X** | **포즈 + Weight** 로 주먹·그립·목 |
+| Plot to Skeleton **전** | Layer로 확정된 pose 기준 | Weight·hold 재생 확인 |
+
+**비유 (문서용 한 줄):** Live Retarget = **통역**, Plot to CR = **초고**, Layer = **연필 수정**, Plot to Skeleton = **인쇄**, Unity = **배포**.
 
 ---
 
@@ -76,7 +93,8 @@ FBX export → Unity / Timeline / Cinemachine
 |------|------------------|------|
 | **Match Source** | **Off** | root·접지는 Control Rig에서 확정 |
 | **스케일** | 모션에 맞춤 (Phase 2.1) | [fundamentals §5](retargeting-fundamentals.md#5-스케일--비율-proportion) |
-| **Source → Target** | Character Controls / Story — 소스 선택 | UI 경로는 버전·레이아웃에 따라 다름 |
+| **Source → Target** | Character Controls — 소스 캐릭터 | Live Retarget 프리뷰 |
+| **Hand IK (Plot 전)** | **Off 또는 낮게** | Plot 전 T/R 100 금지 — [§ Hand IK × Layer](#hand-ik--animation-layer-타이밍) |
 
 ### 2.3 프리뷰 체크 (Plot 전)
 
@@ -100,7 +118,7 @@ FBX export → Unity / Timeline / Cinemachine
    - Sample: **take fps와 동일**
    - Constant Key Reducer: **Off** 또는 보수적 (접지 키 보존)
 
-Control Rig 컨트롤이 활성화되면 Phase 4로.
+Control Rig 컨트롤이 활성화되면 **소스 제거 · Source Off** ([실무 #8](#실무-순서--animation-layer-파이프-권장)) 후 Phase 4.
 
 ---
 
@@ -114,11 +132,10 @@ Control Rig 컨트롤이 활성화되면 Phase 4로.
 2. 필요 시 **hip counter-translate** (발은 고정, 골반만 미세 이동).
 3. 계단·경사면은 프레임별로 contact 키.
 
-### 4.2 손 · 머리
+### 4.2 손 · 머리 (Animation Layer)
 
-- Reach / Hand IK로 그립·터치 위치.
-- Neck/Head FK로 look 방향 미세 조정 (시네머신 연동 시 과도한 head key는 피할 수 있음).
-- **구간 Override (주먹·그립·목 과꺾임):** Animation Layer + Weight — [layer-override-hands-head.md](layer-override-hands-head.md).
+Control Rig **Animation Layer** + Weight — [layer-override-hands-head.md](layer-override-hands-head.md) (실무 #9).  
+Plot 전 Hand IK 100 금지 → [Hand IK × Layer](#hand-ik--animation-layer-타이밍).
 
 ### 4.3 Spine / Hip
 
@@ -171,17 +188,14 @@ Unity import 시 foot sliding 등은 [unity-import.md](../unity-import.md).
 
 ## 세션 체크리스트
 
+[실무 순서 12단계](#실무-순서--animation-layer-파이프-권장) 기준. Layer·Weight 상세: [layer-override-hands-head.md](layer-override-hands-head.md).
+
 ### MotionBuilder
 
-- [ ] 타겟 characterize + reference pose OK
-- [ ] 모션 merge — fps·축 OK
-- [ ] 소스 characterize + mapping OK
-- [ ] 스케일 모션에 맞춤
-- [ ] Retarget — Match Source Off
-- [ ] Plot to Control Rig (reducer 보수적)
-- [ ] Foot / hand / spine 클린업
-- [ ] Plot to Skeleton
-- [ ] Export — skeleton only, 옵션 기록
+- [ ] Plot 전 Hand IK **100 아님** · Match Source Off
+- [ ] Plot to CR 후 **소스 캐릭터 제거**
+- [ ] Animation Layer + Weight (손·목)
+- [ ] Plot to Skeleton · export skeleton only
 
 ### Unity (downstream)
 
@@ -218,4 +232,5 @@ Unity import 시 foot sliding 등은 [unity-import.md](../unity-import.md).
 ## 관련 문서
 
 - [retargeting-fundamentals.md](retargeting-fundamentals.md) — 개념·옵션·원인
+- [layer-override-hands-head.md](layer-override-hands-head.md) — Layer · Weight
 - [unity-import.md](../unity-import.md) — Unity import
