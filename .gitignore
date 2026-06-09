@@ -1,0 +1,20 @@
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# Local / sensitive (do not commit)
+docs/private/
+*.local.md
+.env
+*.key
+
+# MotionBuilder temp / backup
+*.bak
+*.tmp
