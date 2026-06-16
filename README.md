@@ -41,17 +41,17 @@ Mobu-Notes/
 
 ## Post pipeline (요약)
 
-**매 take 작업할 때** → [실무 12단계](post/workflows/retargeting-cleanup.md#실무-순서--animation-layer-파이프-권장)  
+**매 take 작업할 때** → [실무 순서](post/workflows/retargeting-cleanup.md#실무-순서--animation-layer-파이프-권장)  
 **처음 공부할 때** → [fundamentals](post/workflows/retargeting-fundamentals.md) → [cleanup](post/workflows/retargeting-cleanup.md) → [Unity import](post/unity-import.md)
 
 | Step | Mobu에서 | 기억할 것 |
 |------|----------|-----------|
-| **Setup** | motion-only FBX · target characterize · Source · scale | Reference pose 확인 · **Plot 전 Hand IK 100 금지** |
+| **Setup** | motion-only FBX · Source QC · target characterize · scale | 원본 튐은 Plot 전 소스에서 먼저 정리 |
 | **Bake** | Plot to **Control Rig** · source 캐릭터 삭제 | full body + fingers · Key Reducer **Off** |
-| **Fix** | **Animation Layer** + Weight · Foot IK | pose = layer · timing = **Weight** |
+| **Fix** | **Animation Layer** + Weight · Foot IK | hard finger hold는 Base finger flat 옵션 |
 | **Export** | Plot to **Skeleton** · FBX | skeleton anim만 (CR·source 제외) |
 
-손목·finger **drift**가 남으면 → [Layer 가이드](post/workflows/layer-override-hands-head.md) (Plot 전 Hand IK 100 / source 잔존 / Weight 없이 pose만 키)
+손목·finger **drift**가 남으면 → [Layer 가이드](post/workflows/layer-override-hands-head.md) (손목 IK · finger FK · Weight 역할 분리)
 
 ---
 
@@ -60,7 +60,7 @@ Mobu-Notes/
 ### Post — learning path
 
 1. [retargeting-fundamentals.md](post/workflows/retargeting-fundamentals.md) — Characterize, Match Source, plot이 **왜** 그런지
-2. [retargeting-cleanup.md](post/workflows/retargeting-cleanup.md) — **실무 12단계** · Phase 0~6
+2. [retargeting-cleanup.md](post/workflows/retargeting-cleanup.md) — **실무 순서** · Phase 0~6
 3. [layer-override-hands-head.md](post/workflows/layer-override-hands-head.md) — hand · neck Layer + Weight
 4. [unity-import.md](post/unity-import.md) — Unity FBX import
 
@@ -114,7 +114,7 @@ cd post/scripts
 
 | I want to… | Open |
 |------------|------|
-| 오늘 take cleanup | [실무 12단계](post/workflows/retargeting-cleanup.md#실무-순서--animation-layer-파이프-권장) |
+| 오늘 take cleanup | [실무 순서](post/workflows/retargeting-cleanup.md#실무-순서--animation-layer-파이프-권장) |
 | Mobu path · Retargeter | [installation.md](post/installation.md) |
 | 방송 전 점검 | [pre-broadcast checklist](live/checklists/pre-broadcast-mocap.md) |
 | 버그·세션 기록 | [issue-log](shared/templates/issue-log.md) |

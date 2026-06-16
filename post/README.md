@@ -21,7 +21,7 @@
 
 | Doc | When |
 |-----|------|
-| **[실무 12단계](workflows/retargeting-cleanup.md#실무-순서--animation-layer-파이프-권장)** | **오늘 take 작업** |
+| **[실무 순서](workflows/retargeting-cleanup.md#실무-순서--animation-layer-파이프-권장)** | **오늘 take 작업** |
 | [workflows/README.md](workflows/README.md) | 처음 읽을 때 · 문서 목록 |
 | [retargeting-fundamentals.md](workflows/retargeting-fundamentals.md) | Match Source, plot 등 **개념** |
 | [layer-override-hands-head.md](workflows/layer-override-hands-head.md) | hand · neck **Layer + Weight** |

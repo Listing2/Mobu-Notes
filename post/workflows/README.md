@@ -9,7 +9,7 @@ MotionBuilder **FBX post-process** 절차. Live stream은 [live/](../../live/).
 | Doc | Role |
 |-----|------|
 | [retargeting-fundamentals.md](retargeting-fundamentals.md) | **Concept** — Characterize, mapping, Match Source, plot |
-| [retargeting-cleanup.md](retargeting-cleanup.md) | **How-to** — Phase 0~6 · [실무 12단계](retargeting-cleanup.md#실무-순서--animation-layer-파이프-권장) |
+| [retargeting-cleanup.md](retargeting-cleanup.md) | **How-to** — Phase 0~6 · [실무 순서](retargeting-cleanup.md#실무-순서--animation-layer-파이프-권장) |
 | [layer-override-hands-head.md](layer-override-hands-head.md) | hand · neck — Animation Layer + Weight |
 | _(planned)_ `character-setup.md` | VRM/FBX → characterize |
 | _(planned)_ `export-presets.md` | FBX export preset |
