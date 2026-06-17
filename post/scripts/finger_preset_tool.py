@@ -1,4 +1,4 @@
-# Mobu 2025 — finger FK pose preset tool
+# Mobu 2025 - finger FK pose preset tool
 # Run: Window -> Python Editor -> Open -> Execute
 
 from pyfbsdk import *  # noqa: F403
@@ -287,7 +287,7 @@ def main() -> None:
     print("[FingerPreset] Tool opened.")
 
 
-if __name__ in ("__main__", "__builtin__"):
+if __name__ != "finger_preset_tool":
     try:
         main()
     except Exception:

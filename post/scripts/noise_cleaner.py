@@ -1,4 +1,4 @@
-# Mobu 2025 — selected source / CR FCurve noise cleaner tool
+# Mobu 2025 - selected source / CR FCurve noise cleaner tool
 # Run: Window -> Python Editor -> Open -> Execute
 
 from pyfbsdk import *  # noqa: F403
@@ -652,7 +652,7 @@ def main() -> None:
     print("[NoiseCleaner] Tool opened.")
 
 
-if __name__ in ("__main__", "__builtin__"):
+if __name__ != "noise_cleaner":
     try:
         main()
     except Exception:
