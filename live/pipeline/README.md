@@ -1,6 +1,6 @@
 # Pipeline — Overview
 
-post(FBX cleanup) 와 live(real-time stream) **전체 그림**.
+High-level map for **post** (FBX cleanup) and **live** (real-time stream).
 
 | Doc | What |
 |-----|------|

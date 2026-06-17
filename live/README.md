@@ -1,8 +1,8 @@
 # live — Real-time & Broadcast
 
-**실시간** mocap stream, Unity sync, 방송 전 checklist.
+**Real-time** mocap stream, Unity sync, and pre-broadcast checklists.
 
-FBX retarget·Control Rig cleanup은 **[post/](../post/)** — 여기서 다루지 않습니다.
+For FBX retarget / Control Rig cleanup, use **[post/](../post/)**.
 
 ---
 
@@ -10,11 +10,11 @@ FBX retarget·Control Rig cleanup은 **[post/](../post/)** — 여기서 다루�
 
 | Path | What |
 |------|------|
-| [pipeline/overview.md](pipeline/overview.md) | post + live 전체 pipeline |
+| [pipeline/overview.md](pipeline/overview.md) | post + live overview |
 | [motionbuilder/](motionbuilder/) | Mobu **stream** fps · plugins |
 | [unity/](unity/) | Unity **live** sync · ports |
-| [troubleshooting/](troubleshooting/) | jitter 등 |
-| [checklists/](checklists/) | 방송 전 점검 |
+| [troubleshooting/](troubleshooting/) | jitter and live issues |
+| [checklists/](checklists/) | pre-broadcast checks |
 
 ---
 

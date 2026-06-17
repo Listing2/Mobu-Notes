@@ -1,6 +1,6 @@
 # Unity — Live
 
-Unity **real-time** 수신·sync · network (Mobu live stream, VMC, OSC).
+Unity **real-time** receiver, sync, and network notes (Mobu live stream, VMC, OSC).
 
 ---
 

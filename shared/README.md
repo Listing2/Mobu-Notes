@@ -1,9 +1,9 @@
 # Shared — Templates
 
-post / live **공통** 기록 템플릿.
+Shared templates for both **post** and **live** work.
 
 | Path | Use |
 |------|-----|
-| [templates/issue-log.md](templates/issue-log.md) | 세션·버그·재현 조건 |
+| [templates/issue-log.md](templates/issue-log.md) | session, bug, repro notes |
 
-live인지 post인지 **증상·환경**란에 적어 두기.
+Mark whether the note is for **post** or **live** in the symptom/environment section.

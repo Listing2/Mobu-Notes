@@ -1,6 +1,6 @@
 # Workflows — post
 
-MotionBuilder **FBX post-process** 절차. Live stream은 [live/](../../live/).
+MotionBuilder **FBX post-process** workflows. For live stream notes, see [live/](../../live/).
 
 ---
 
@@ -9,7 +9,7 @@ MotionBuilder **FBX post-process** 절차. Live stream은 [live/](../../live/).
 | Doc | Role |
 |-----|------|
 | [retargeting-fundamentals.md](retargeting-fundamentals.md) | **Concept** — Characterize, mapping, Match Source, plot |
-| [retargeting-cleanup.md](retargeting-cleanup.md) | **How-to** — Phase 0~6 · [실무 순서](retargeting-cleanup.md#실무-순서--animation-layer-파이프-권장) |
+| [retargeting-cleanup.md](retargeting-cleanup.md) | **How-to** — Phase 0~6 · [practical flow](retargeting-cleanup.md#실무-순서--animation-layer-파이프-권장) |
 | [layer-override-hands-head.md](layer-override-hands-head.md) | hand · neck — Animation Layer + Weight |
 | _(planned)_ `character-setup.md` | VRM/FBX → characterize |
 | _(planned)_ `export-presets.md` | FBX export preset |
@@ -18,11 +18,11 @@ MotionBuilder **FBX post-process** 절차. Live stream은 [live/](../../live/).
 
 ## Learning path (first time)
 
-1. [fundamentals](retargeting-fundamentals.md) — 왜 이렇게 하는지
-2. [cleanup](retargeting-cleanup.md) — 실제 클릭 순서
-3. [unity-import.md](../unity-import.md) — Unity 쪽
+1. [fundamentals](retargeting-fundamentals.md) — why the pipeline works this way
+2. [cleanup](retargeting-cleanup.md) — practical click/order flow
+3. [unity-import.md](../unity-import.md) — Unity import side
 
-세션 기록 양식: [cleanup — 세션 로그](retargeting-cleanup.md#세션-로그-복붙용)
+Session log template: [cleanup — session log](retargeting-cleanup.md#세션-로그-복붙용)
 
 ---
 

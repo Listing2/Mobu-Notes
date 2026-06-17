@@ -1,6 +1,6 @@
 # MotionBuilder — Live Stream
 
-Mobu **송출·fps·플러그인** 설정. FBX retarget·Control Rig는 [post/](../../post/).
+Mobu **streaming, fps, and plugin** notes. For FBX retarget / Control Rig cleanup, use [post/](../../post/).
 
 ---
 
@@ -8,15 +8,15 @@ Mobu **송출·fps·플러그인** 설정. FBX retarget·Control Rig는 [post/](
 
 | Doc | What |
 |-----|------|
-| [framerate-policy.md](framerate-policy.md) | stream fps · 운영 정책 |
+| [framerate-policy.md](framerate-policy.md) | stream fps · operating policy |
 | _(planned)_ `export-settings.md` | Unity / external stream |
 | _(planned)_ `plugins.md` | plugins in use |
-| _(planned)_ `scene-template.md` | live용 standard scene |
+| _(planned)_ `scene-template.md` | standard scene for live |
 
 ---
 
 ## Session notes
 
-기록 양식: [shared/templates/issue-log.md](../../shared/templates/issue-log.md)
+Template: [shared/templates/issue-log.md](../../shared/templates/issue-log.md)
 
-live 세션에 자주 적는 항목: Mobu version · stream target (IP, port) · fps · 동시 캡처 인원
+Common live-session fields: Mobu version · stream target (IP, port) · fps · performer count
