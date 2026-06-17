@@ -1,5 +1,9 @@
 # Mobu-Notes
 
+<p align="center">
+  <b>English</b> | <a href="./README.ko.md">한국어</a>
+</p>
+
 Studio notes for the **MotionBuilder -> Unity -> broadcast** mocap pipeline.
 This repo keeps post-process, live-stream, scripts, and session templates in one place.
 
