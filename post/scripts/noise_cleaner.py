@@ -489,9 +489,9 @@ class NoiseCleanerTool(object):
         self.status = FBMemo()
         self.status.ReadOnly = True
         self.status.Text = (
-            "Select one or many source bones / CR controls, then click a button.\n"
-            "Use Source cleanup before retarget. Use CR cleanup after Plot to CR.\n"
-            "Clean = smooth jitter. Spike = one-frame pop. Flatten/Hold = hard hold."
+            "소스 본 또는 CR 컨트롤을 하나 이상 선택한 뒤 버튼을 누르세요.\n"
+            "소스 클린업은 retarget 전, CR 클린업은 Plot to CR 후에 사용합니다.\n"
+            "Clean=잔떨림 완화, Spike=튀는 키, Flatten/Hold=구간 고정."
         )
 
         self._build_ui()
@@ -519,9 +519,9 @@ class NoiseCleanerTool(object):
         return button
 
     def _build_ui(self):
-        self._add_region("start_label", 10, 10, 90, 22, self._label("Start frame"))
+        self._add_region("start_label", 10, 10, 90, 22, self._label("Start"))
         self._add_region("start_edit", 105, 10, 90, 22, self.start_edit)
-        self._add_region("end_label", 210, 10, 80, 22, self._label("End frame"))
+        self._add_region("end_label", 210, 10, 80, 22, self._label("End"))
         self._add_region("end_edit", 295, 10, 90, 22, self.end_edit)
 
         self._add_region("strength_label", 10, 42, 90, 22, self._label("Strength"))
@@ -531,9 +531,9 @@ class NoiseCleanerTool(object):
 
         self._add_region("passes_label", 10, 74, 90, 22, self._label("Passes"))
         self._add_region("passes_edit", 105, 74, 90, 22, self.passes_edit)
-        self._add_region("edge_note", 210, 74, 220, 22, self._label("First/last keys are kept"))
+        self._add_region("edge_note", 210, 74, 220, 22, self._label("Keep edge keys"))
 
-        self._add_region("spike_label", 10, 106, 90, 22, self._label("Spike thr"))
+        self._add_region("spike_label", 10, 106, 90, 22, self._label("Spike Threshold"))
         self._add_region("spike_edit", 105, 106, 90, 22, self.spike_edit)
         self._add_region("blend_label", 210, 106, 80, 22, self._label("Blend"))
         self._add_region("blend_edit", 295, 106, 90, 22, self.blend_edit)

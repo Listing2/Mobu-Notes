@@ -2,6 +2,8 @@
 
 MotionBuilder 2025 `pyfbsdk` automation and batch scripts. **Run inside Mobu**; the Cursor venv is only for editing/autocomplete.
 
+Tool code and short UI labels use English; longer in-Mobu guidance can use Korean for quick visual checks.
+
 ---
 
 ## Inventory

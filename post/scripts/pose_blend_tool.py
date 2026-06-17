@@ -11,7 +11,7 @@ TARGET_FRAME = 15
 END_FRAME = 30
 STRENGTH = 0.75
 
-_TOOL_NAME = "Mobu Pose Blend"
+_TOOL_NAME = "포즈 블렌드"
 _TOOL_REF = None
 _EXCLUDE_WORDS = (
     "root",
@@ -241,9 +241,9 @@ class PoseBlendTool(object):
         self.status = FBMemo()
         self.status.ReadOnly = True
         self.status.Text = (
-            "Select upper-body / arm / head controls.\n"
-            "Set a target pose key at Target frame, then blend Start-End toward it.\n"
-            "Root / hips / legs / feet are ignored by name."
+            "팔, 상체, 머리 컨트롤을 선택하세요.\n"
+            "Target 프레임에 원하는 포즈 키를 찍고, Start-End 구간을 그쪽으로 유도합니다.\n"
+            "root, hips, leg, foot 계열 이름은 자동 제외합니다."
         )
 
         self._build_ui()

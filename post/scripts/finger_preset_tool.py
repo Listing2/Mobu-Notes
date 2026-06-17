@@ -10,7 +10,7 @@ START_FRAME = 0
 END_FRAME = 30
 BLEND_FRAMES = 2
 
-_TOOL_NAME = "Mobu Finger Presets"
+_TOOL_NAME = "손가락 포즈 프리셋"
 _TOOL_REF = None
 _SLOTS = {
     "A": [],
@@ -181,9 +181,9 @@ class FingerPresetTool(object):
         self.status = FBMemo()
         self.status.ReadOnly = True
         self.status.Text = (
-            "Select finger FK controls in a stable order.\n"
-            "Pose fingers, Capture A/B/C, then Apply or Hold the same selection.\n"
-            "Use for Fist / Open / Index Point / Grip style poses."
+            "Finger FK 컨트롤을 같은 순서로 선택하세요.\n"
+            "손 모양을 만든 뒤 A/B/C에 캡처하고, 같은 선택에 적용/Hold합니다.\n"
+            "주먹, 펼침, 검지, 그립 포즈에 사용합니다."
         )
 
         self._build_ui()
@@ -211,24 +211,24 @@ class FingerPresetTool(object):
         return button
 
     def _build_ui(self):
-        self._add_region("start_label", 10, 10, 90, 22, self._label("Start frame"))
+        self._add_region("start_label", 10, 10, 90, 22, self._label("Start"))
         self._add_region("start_edit", 105, 10, 90, 22, self.start_edit)
-        self._add_region("end_label", 210, 10, 80, 22, self._label("End frame"))
+        self._add_region("end_label", 210, 10, 80, 22, self._label("End"))
         self._add_region("end_edit", 295, 10, 90, 22, self.end_edit)
         self._add_region("blend_label", 395, 10, 50, 22, self._label("Blend"))
         self._add_region("blend_edit", 445, 10, 45, 22, self.blend_edit)
 
         self._add_region("cap_a", 10, 52, 150, 28, self._button("Capture A", self._capture_a))
         self._add_region("apply_a", 175, 52, 150, 28, self._button("Apply A", self._apply_a))
-        self._add_region("hold_a", 340, 52, 150, 28, self._button("Hold A", self._hold_a))
+        self._add_region("hold_a", 340, 52, 150, 28, self._button("A Hold", self._hold_a))
 
         self._add_region("cap_b", 10, 90, 150, 28, self._button("Capture B", self._capture_b))
         self._add_region("apply_b", 175, 90, 150, 28, self._button("Apply B", self._apply_b))
-        self._add_region("hold_b", 340, 90, 150, 28, self._button("Hold B", self._hold_b))
+        self._add_region("hold_b", 340, 90, 150, 28, self._button("B Hold", self._hold_b))
 
         self._add_region("cap_c", 10, 128, 150, 28, self._button("Capture C", self._capture_c))
         self._add_region("apply_c", 175, 128, 150, 28, self._button("Apply C", self._apply_c))
-        self._add_region("hold_c", 340, 128, 150, 28, self._button("Hold C", self._hold_c))
+        self._add_region("hold_c", 340, 128, 150, 28, self._button("C Hold", self._hold_c))
 
         self._add_region("status", 10, 175, 480, 135, self.status)
 
