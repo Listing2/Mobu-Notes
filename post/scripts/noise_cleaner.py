@@ -13,9 +13,12 @@ STRENGTH = 0.5
 RADIUS = 2
 PASSES = 2
 KEEP_RANGE_EDGES = True
+SPIKE_THRESHOLD = 20.0
+BLEND_FRAMES = 2
 
 _TOOL_NAME = "Mobu Noise Cleaner"
 _TOOL_REF = None
+_BACKUP = {}
 
 
 def _clamp(value, min_value, max_value):
@@ -28,6 +31,13 @@ def _frame_time(frame):
 
 def _time_ticks(time_value):
     return time_value.Get()
+
+
+def _time_to_frame(time_value):
+    try:
+        return int(time_value.GetFrame())
+    except Exception:
+        return _time_ticks(time_value)
 
 
 def _selected_models():
@@ -156,11 +166,304 @@ def clean_selected_noise(start_frame, end_frame, channel_mode, strength, radius,
     )
 
 
+def _flatten_fcurve(fcurve, start_time, start_ticks, end_ticks):
+    indices = _key_indices_in_range(fcurve, start_ticks, end_ticks)
+    if not indices:
+        return 0
+
+    hold_value = float(fcurve.Evaluate(start_time))
+    changed = 0
+
+    for index in indices:
+        old_value = float(fcurve.KeyGetValue(index))
+        if abs(old_value - hold_value) > 0.000001:
+            fcurve.KeySetValue(index, hold_value)
+            changed += 1
+
+    return changed
+
+
+def _spike_indices(fcurve, start_ticks, end_ticks, threshold):
+    indices = _key_indices_in_range(fcurve, start_ticks, end_ticks)
+    if len(indices) < 3:
+        return []
+
+    spikes = []
+    values = [float(fcurve.KeyGetValue(index)) for index in indices]
+
+    for local_index in range(1, len(indices) - 1):
+        prev_value = values[local_index - 1]
+        current_value = values[local_index]
+        next_value = values[local_index + 1]
+        neighbor_average = (prev_value + next_value) * 0.5
+
+        if abs(current_value - neighbor_average) >= threshold:
+            spikes.append((indices[local_index], neighbor_average))
+
+    return spikes
+
+
+def scan_selected_spikes(start_frame, end_frame, channel_mode, threshold):
+    start_frame = int(min(start_frame, end_frame))
+    end_frame = int(max(start_frame, end_frame))
+    start_ticks = _time_ticks(_frame_time(start_frame))
+    end_ticks = _time_ticks(_frame_time(end_frame))
+    threshold = abs(float(threshold))
+
+    selected = _selected_models()
+    if not selected:
+        return "No selected source bone / CR control."
+
+    scanned_curves = 0
+    hit_lines = []
+
+    for model in selected:
+        for node, path in _iter_animation_nodes(model.AnimationNode):
+            if not _channel_matches(path, channel_mode):
+                continue
+
+            fcurve = node.FCurve
+            if fcurve is None:
+                continue
+
+            scanned_curves += 1
+            spikes = _spike_indices(fcurve, start_ticks, end_ticks, threshold)
+            if spikes:
+                frames = []
+                for index, _ in spikes[:8]:
+                    frames.append(str(_time_to_frame(fcurve.Keys[index].Time)))
+                hit_lines.append("{name}: {count} spikes @ {frames}".format(
+                    name=path.strip("/") or model.Name,
+                    count=len(spikes),
+                    frames=", ".join(frames),
+                ))
+
+    if not hit_lines:
+        return "Spike scan\nScanned curves: {0}\nNo spikes over threshold {1}.".format(
+            scanned_curves,
+            threshold,
+        )
+
+    return "Spike scan\nScanned curves: {0}\n{1}".format(
+        scanned_curves,
+        "\n".join(hit_lines[:30]),
+    )
+
+
+def fix_selected_spikes(start_frame, end_frame, channel_mode, threshold):
+    start_frame = int(min(start_frame, end_frame))
+    end_frame = int(max(start_frame, end_frame))
+    start_ticks = _time_ticks(_frame_time(start_frame))
+    end_ticks = _time_ticks(_frame_time(end_frame))
+    threshold = abs(float(threshold))
+
+    selected = _selected_models()
+    if not selected:
+        return "No selected source bone / CR control."
+
+    scanned_curves = 0
+    changed_curves = 0
+    changed_keys = 0
+
+    for model in selected:
+        for node, path in _iter_animation_nodes(model.AnimationNode):
+            if not _channel_matches(path, channel_mode):
+                continue
+
+            fcurve = node.FCurve
+            if fcurve is None:
+                continue
+
+            scanned_curves += 1
+            spikes = _spike_indices(fcurve, start_ticks, end_ticks, threshold)
+            if not spikes:
+                continue
+
+            changed_curves += 1
+            for index, replacement in spikes:
+                fcurve.KeySetValue(index, replacement)
+                changed_keys += 1
+
+    return (
+        "Spike fix\n"
+        "Selected models: {models}\n"
+        "Frame range: {start} - {end}\n"
+        "Channel: {channel}\n"
+        "Threshold: {threshold}\n"
+        "Scanned curves: {scanned}\n"
+        "Changed: {curves} curves / {keys} keys"
+    ).format(
+        models=len(selected),
+        start=start_frame,
+        end=end_frame,
+        channel=channel_mode,
+        threshold=threshold,
+        scanned=scanned_curves,
+        curves=changed_curves,
+        keys=changed_keys,
+    )
+
+
+def flatten_selected_range(start_frame, end_frame, channel_mode):
+    start_frame = int(min(start_frame, end_frame))
+    end_frame = int(max(start_frame, end_frame))
+    start_time = _frame_time(start_frame)
+    start_ticks = _time_ticks(start_time)
+    end_ticks = _time_ticks(_frame_time(end_frame))
+
+    selected = _selected_models()
+    if not selected:
+        return "No selected source bone / CR control."
+
+    curve_count = 0
+    key_count = 0
+    scanned_curves = 0
+
+    for model in selected:
+        for node, path in _iter_animation_nodes(model.AnimationNode):
+            if not _channel_matches(path, channel_mode):
+                continue
+
+            fcurve = node.FCurve
+            if fcurve is None:
+                continue
+
+            scanned_curves += 1
+            changed = _flatten_fcurve(fcurve, start_time, start_ticks, end_ticks)
+            if changed:
+                curve_count += 1
+                key_count += changed
+
+    return (
+        "Flatten selected range\n"
+        "Selected models: {models}\n"
+        "Frame range: {start} - {end}\n"
+        "Channel: {channel}\n"
+        "Scanned curves: {scanned}\n"
+        "Changed: {curves} curves / {keys} keys"
+    ).format(
+        models=len(selected),
+        start=start_frame,
+        end=end_frame,
+        channel=channel_mode,
+        scanned=scanned_curves,
+        curves=curve_count,
+        keys=key_count,
+    )
+
+
+def hold_selected_range(start_frame, end_frame, channel_mode, blend_frames):
+    start_frame = int(min(start_frame, end_frame))
+    end_frame = int(max(start_frame, end_frame))
+    blend_frames = max(0, int(blend_frames))
+
+    pre_frame = start_frame - blend_frames
+    post_frame = end_frame + blend_frames
+
+    start_time = _frame_time(start_frame)
+    end_time = _frame_time(end_frame)
+    pre_time = _frame_time(pre_frame)
+    post_time = _frame_time(post_frame)
+
+    selected = _selected_models()
+    if not selected:
+        return "No selected source bone / CR control."
+
+    curve_count = 0
+    key_count = 0
+
+    for model in selected:
+        for node, path in _iter_animation_nodes(model.AnimationNode):
+            if not _channel_matches(path, channel_mode):
+                continue
+
+            fcurve = node.FCurve
+            if fcurve is None:
+                continue
+
+            pre_value = float(fcurve.Evaluate(pre_time))
+            hold_value = float(fcurve.Evaluate(start_time))
+            post_value = float(fcurve.Evaluate(post_time))
+
+            fcurve.KeyAdd(pre_time, pre_value)
+            fcurve.KeyAdd(start_time, hold_value)
+            fcurve.KeyAdd(end_time, hold_value)
+            fcurve.KeyAdd(post_time, post_value)
+
+            curve_count += 1
+            key_count += 4
+
+    return (
+        "Hold keys created\n"
+        "Selected models: {models}\n"
+        "Hold: {start} - {end}\n"
+        "Blend frames: {blend}\n"
+        "Channel: {channel}\n"
+        "Added: {curves} curves / {keys} keys"
+    ).format(
+        models=len(selected),
+        start=start_frame,
+        end=end_frame,
+        blend=blend_frames,
+        channel=channel_mode,
+        curves=curve_count,
+        keys=key_count,
+    )
+
+
+def backup_selected_curves(channel_mode):
+    global _BACKUP
+    selected = _selected_models()
+    if not selected:
+        return "No selected source bone / CR control."
+
+    _BACKUP = {}
+    curve_count = 0
+    key_count = 0
+
+    for model in selected:
+        for node, path in _iter_animation_nodes(model.AnimationNode):
+            if not _channel_matches(path, channel_mode):
+                continue
+
+            fcurve = node.FCurve
+            if fcurve is None:
+                continue
+
+            values = []
+            for index, _ in enumerate(fcurve.Keys):
+                values.append((index, float(fcurve.KeyGetValue(index))))
+
+            if values:
+                _BACKUP[fcurve] = values
+                curve_count += 1
+                key_count += len(values)
+
+    return "Backup saved\nCurves: {0}\nKeys: {1}".format(curve_count, key_count)
+
+
+def restore_backup():
+    if not _BACKUP:
+        return "No backup in this tool session."
+
+    curve_count = 0
+    key_count = 0
+
+    for fcurve, values in _BACKUP.items():
+        curve_count += 1
+        for index, value in values:
+            if index < len(fcurve.Keys):
+                fcurve.KeySetValue(index, value)
+                key_count += 1
+
+    return "Backup restored\nCurves: {0}\nKeys: {1}".format(curve_count, key_count)
+
+
 class NoiseCleanerTool(object):
     def __init__(self):
         self.tool = FBCreateUniqueTool(_TOOL_NAME)
         self.tool.StartSizeX = 520
-        self.tool.StartSizeY = 360
+        self.tool.StartSizeY = 545
 
         self.start_edit = FBEditNumber()
         self.start_edit.Value = float(START_FRAME)
@@ -177,12 +480,18 @@ class NoiseCleanerTool(object):
         self.passes_edit = FBEditNumber()
         self.passes_edit.Value = float(PASSES)
 
+        self.spike_edit = FBEditNumber()
+        self.spike_edit.Value = float(SPIKE_THRESHOLD)
+
+        self.blend_edit = FBEditNumber()
+        self.blend_edit.Value = float(BLEND_FRAMES)
+
         self.status = FBMemo()
         self.status.ReadOnly = True
         self.status.Text = (
-            "Select source bones or CR controls, then click a clean button.\n"
+            "Select one or many source bones / CR controls, then click a button.\n"
             "Use Source cleanup before retarget. Use CR cleanup after Plot to CR.\n"
-            "Start weak: strength 0.3 - 0.5."
+            "Clean = smooth jitter. Spike = one-frame pop. Flatten/Hold = hard hold."
         )
 
         self._build_ui()
@@ -224,11 +533,28 @@ class NoiseCleanerTool(object):
         self._add_region("passes_edit", 105, 74, 90, 22, self.passes_edit)
         self._add_region("edge_note", 210, 74, 220, 22, self._label("First/last keys are kept"))
 
-        self._add_region("btn_rot", 10, 112, 150, 30, self._button("Clean Rotation", self._clean_rotation))
-        self._add_region("btn_trans", 175, 112, 150, 30, self._button("Clean Translation", self._clean_translation))
-        self._add_region("btn_all", 340, 112, 150, 30, self._button("Clean All", self._clean_all))
+        self._add_region("spike_label", 10, 106, 90, 22, self._label("Spike thr"))
+        self._add_region("spike_edit", 105, 106, 90, 22, self.spike_edit)
+        self._add_region("blend_label", 210, 106, 80, 22, self._label("Blend"))
+        self._add_region("blend_edit", 295, 106, 90, 22, self.blend_edit)
 
-        self._add_region("status", 10, 155, 480, 165, self.status)
+        self._add_region("backup", 10, 142, 150, 28, self._button("Backup All", self._backup_all))
+        self._add_region("restore", 175, 142, 150, 28, self._button("Restore Backup", self._restore_backup))
+        self._add_region("scan", 340, 142, 150, 28, self._button("Scan Spikes", self._scan_spikes))
+
+        self._add_region("clean_rot", 10, 180, 150, 28, self._button("Clean Rotation", self._clean_rotation))
+        self._add_region("clean_trans", 175, 180, 150, 28, self._button("Clean Translation", self._clean_translation))
+        self._add_region("clean_all", 340, 180, 150, 28, self._button("Clean All", self._clean_all))
+
+        self._add_region("spike_fix", 10, 218, 150, 28, self._button("Fix Spikes All", self._fix_spikes_all))
+        self._add_region("flat_all", 175, 218, 150, 28, self._button("Flatten All", self._flatten_all))
+        self._add_region("hold_all", 340, 218, 150, 28, self._button("Hold Keys All", self._hold_all))
+
+        self._add_region("flat_rot", 10, 256, 150, 28, self._button("Flatten Rotation", self._flatten_rotation))
+        self._add_region("flat_trans", 175, 256, 150, 28, self._button("Flatten Translation", self._flatten_translation))
+        self._add_region("hold_rot", 340, 256, 150, 28, self._button("Hold Rotation", self._hold_rotation))
+
+        self._add_region("status", 10, 300, 480, 195, self.status)
 
     def _settings(self):
         return (
@@ -239,6 +565,12 @@ class NoiseCleanerTool(object):
             max(1, int(self.passes_edit.Value)),
             True,
         )
+
+    def _spike_threshold(self):
+        return max(0.0, float(self.spike_edit.Value))
+
+    def _blend_frames(self):
+        return max(0, int(self.blend_edit.Value))
 
     def _run(self, mode):
         start, end, strength, radius, passes, keep_edges = self._settings()
@@ -256,6 +588,59 @@ class NoiseCleanerTool(object):
     def _clean_all(self, control, event):
         self._run("all")
 
+    def _flatten(self, mode):
+        start, end, strength, radius, passes, keep_edges = self._settings()
+        message = flatten_selected_range(start, end, mode)
+        self.status.Text = message
+        print("[NoiseCleaner] " + message.replace("\n", " | "))
+        FBSystem().Scene.Evaluate()
+
+    def _flatten_rotation(self, control, event):
+        self._flatten("rotation")
+
+    def _flatten_translation(self, control, event):
+        self._flatten("translation")
+
+    def _flatten_all(self, control, event):
+        self._flatten("all")
+
+    def _scan_spikes(self, control, event):
+        start, end, strength, radius, passes, keep_edges = self._settings()
+        message = scan_selected_spikes(start, end, "all", self._spike_threshold())
+        self.status.Text = message
+        print("[NoiseCleaner] " + message.replace("\n", " | "))
+
+    def _fix_spikes_all(self, control, event):
+        start, end, strength, radius, passes, keep_edges = self._settings()
+        message = fix_selected_spikes(start, end, "all", self._spike_threshold())
+        self.status.Text = message
+        print("[NoiseCleaner] " + message.replace("\n", " | "))
+        FBSystem().Scene.Evaluate()
+
+    def _hold(self, mode):
+        start, end, strength, radius, passes, keep_edges = self._settings()
+        message = hold_selected_range(start, end, mode, self._blend_frames())
+        self.status.Text = message
+        print("[NoiseCleaner] " + message.replace("\n", " | "))
+        FBSystem().Scene.Evaluate()
+
+    def _hold_all(self, control, event):
+        self._hold("all")
+
+    def _hold_rotation(self, control, event):
+        self._hold("rotation")
+
+    def _backup_all(self, control, event):
+        message = backup_selected_curves("all")
+        self.status.Text = message
+        print("[NoiseCleaner] " + message.replace("\n", " | "))
+
+    def _restore_backup(self, control, event):
+        message = restore_backup()
+        self.status.Text = message
+        print("[NoiseCleaner] " + message.replace("\n", " | "))
+        FBSystem().Scene.Evaluate()
+
     def show(self):
         ShowTool(self.tool)
 
@@ -267,9 +652,10 @@ def main() -> None:
     print("[NoiseCleaner] Tool opened.")
 
 
-try:
-    main()
-except Exception:
-    error = traceback.format_exc()
-    print(error)
-    FBMessageBox("Noise Cleaner Error", error, "OK")
+if __name__ in ("__main__", "__builtin__"):
+    try:
+        main()
+    except Exception:
+        error = traceback.format_exc()
+        print(error)
+        FBMessageBox("Noise Cleaner Error", error, "OK")
