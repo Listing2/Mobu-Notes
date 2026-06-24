@@ -69,6 +69,7 @@ Restart Mobu. A top-level `Mobu Notes` menu should appear with `Noise Cleaner`, 
 2. Select the 15 Finger FK controls in a stable order.
 3. Pose fist / open / index-point / grip, then `Capture A/B/C`.
 4. With the same selection, use `Apply` or set a frame range and `Hold`.
+5. Use `Zero Current`, `Zero Range`, or `Zero All Keys` to reset selected rotation curves to `0`.
 
 For dance/group choreography, repeated pose presets + range hold + light noise clean are usually faster than editing every finger detail.
 

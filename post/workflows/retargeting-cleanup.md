@@ -117,8 +117,10 @@ Phase 번호와 1:1 대응은 아래 표 참고.
 
 ### 2.1 스케일
 
-타겟 캐릭터 scale을 **모션(소스) 스케일에 맞춤**.  
+타겟 캐릭터 scale을 **모션(소스) 스케일에 맞춤** (= 비율 스케일 A).  
 발·무릎·손 reach를 Viewer에서 대표 프레임 몇 개로 확인.
+
+Unity 납품 크기(예: 1.3)는 별개 축(B)이며 [fundamentals §5.4](retargeting-fundamentals.md#54-납품-스케일-b--unity-10-vs-13) 기준으로 처리한다. 핵심은 apply-once: 1.3이면 Mobu에서 1.3으로 구워 mesh·anim·Avatar를 일관되게 두고, Unity에서 추가 scale은 하지 않는다. (import `Scale Factor`는 단위 보정용이지 크기 조절용 아님)
 
 ### 2.2 Retarget 설정
 

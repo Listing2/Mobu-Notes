@@ -108,25 +108,67 @@ Characterize = “이 본이 LeftUpLeg다”를 정의.
 
 리타게팅 품질 1순위 변수. “정설”에서 가장 강조되는 부분.
 
-### 5.1 무엇을 맞추는가
+**먼저 구분 — 스케일에는 성격이 다른 두 가지가 섞여 있다.** 둘을 분리해야 혼선이 없다.
+
+| 구분 | A. 리타겟 비율 스케일 | B. 납품(월드) 스케일 |
+|------|----------------------|----------------------|
+| 무엇 | 소스 모캡 ↔ 타겟 체형·본 길이 차이 | 타겟이 Unity에서 가질 실제 크기 (예: 1.0 vs 1.3) |
+| 영향 | pose 품질·foot sliding·손 reach·penetration | root translation(이동 거리)의 크기 |
+| 다루는 곳 | Mobu Characterize / Retarget | Unity 재생 Avatar · Prefab 부모 scale · import Scale Factor |
+
+아래 5.1~5.3은 **A(비율 스케일)**, 5.4는 **B(납품 스케일)**.
+
+### 5.1 무엇을 맞추는가 (A)
 
 - **키 본 길이 비율:** Hips–Knee–Ankle, Shoulder–Elbow–Wrist
 - **전체 캐릭터 scale:** 모캡 배우 대비 게임 캐릭터 체형
 - **Root height:** 발이 지면에 닿는지
 
-### 5.2 맞추는 방법 (실무)
+### 5.2 맞추는 방법 (A · 실무)
 
 1. 타겟 캐릭터 **Scale** 조정 (모션/소스 스켈에 맞춤 — 본인 워크플로 핵심).
 2. Retarget 옵션의 **Scale Active / Scale Passive** (버전·UI에 따라 이름 상이).
 3. 필요 시 **Character Settings → Definition** 에서 reference scale 확인.
 
-### 5.3 스케일이 틀리면
+### 5.3 스케일(A)이 틀리면
 
 - 발이 땅을 **미끄러짐** (foot IK로도 한계)
 - 손이 무릎·허벅지에 **파묻힘**
 - 어깨 shrug / 팔 over-extension
 
 **원칙:** Unity에서 foot sliding을 돌려도, Mobu에서 비율이 크게 틀리면 근본 해결이 안 된다.
+
+### 5.4 납품 스케일 (B) — Unity 1.0 vs 1.3
+
+체형(A)이 맞아도, 타겟이 Unity에서 1.3배처럼 더 크게 쓰이는 경우가 있다. 핵심은 **scale 배율만큼 root 이동 거리(translation)가 비례해 커진다**는 점이다. pose(관절 회전)는 거의 영향이 없고, 이동량이 스케일에 민감하다.
+
+#### 검증된 메커니즘 (Unity 공식 + 포럼)
+
+- Humanoid 애니는 **muscle space(정규화된 관절 각도)**로 저장된다. 그래서 팔다리 비율이 달라도 다른 Humanoid에 그대로 적용된다. → [Unity Manual: How Root Motion works](https://docs.unity3d.com/Manual/RootMotion.html)
+- Humanoid의 **root motion 이동량에는 `Animator.humanScale`이 곱해진다.** humanScale은 "현재 Avatar의 스케일(Unity 기본 Avatar 기준, generic이면 1)". 즉 **큰 Avatar일수록 한 걸음·이동 거리가 비례해 커진다.** → [Animator.humanScale](https://docs.unity3d.com/ScriptReference/Animator-humanScale.html), [Unity Discussions](https://discussions.unity.com/t/animator-roott-not-in-world-space/658917)
+- 결론: "1.3이면 그만큼 멀리 간다"는 **Humanoid에서도 사실**이고, 그 배율을 결정하는 건 **재생 캐릭터의 Avatar 스케일**이다.
+
+#### 원칙 — 스케일은 체인에서 "딱 한 번"
+
+1.3은 mesh·animation·Avatar 중 한 곳에서만 적용되고 나머지는 따라가야 한다. **두 번 적용되면**(예: 1.3 Avatar + 부모 1.3 scale) 1.69가 되어 over-travel·foot sliding이 난다.
+
+Unity 권장: **같은 mesh에 쓰는 mesh와 모든 animation은 동일 scale로 유지. import `Scale Factor`는 DCC 단위 차이 보정용이지 캐릭터를 키우는 용도가 아니다.** → [Unity Discussions](https://discussions.unity.com/t/animation-root-scale-animates-as-well/407504)
+
+#### 두 경로 (둘 다 유효 · apply-once만 지키면 됨)
+
+| | Unity 1.0 캐릭터 | Unity 1.3 캐릭터 |
+|---|------------------|------------------|
+| Mobu 타겟 | 1.0 | 1.0으로 가져와 **1.3으로 키움** |
+| 소스(모캡) | 타겟 비율(A)에 맞춤 | 1.3 타겟 비율에 맞춤 |
+| export | 1.0 | **1.3** (mesh·anim·Avatar 일관) |
+| Unity | 그대로 재생, 추가 scale X | 그대로 재생, **추가 scale X** |
+
+- **권장:** 최종 크기를 **에셋(mesh+anim)에 구워서** 내보내는 쪽이 깔끔하다. 런타임에 Humanoid GameObject(특히 Animator 오브젝트)를 직접 scale하면 root motion과 섞여 부작용이 보고된다. → [Unity Discussions](https://discussions.unity.com/t/scaled-root-animator-unwanted-effects/685339)
+- 런타임 가변 크기가 꼭 필요하면 Animator **위의 빈 부모**를 scale하거나 `OnAnimatorMove`로 이동량을 스크립트 보정한다. → [Scripting Root Motion](https://docs.unity3d.com/Manual/ScriptingRootMotion.html)
+
+#### 확인 포인트
+
+walk/run 클립으로 **이동 거리(m)**가 의도한 배율로 나오는지 한 모델로 실측한다. idle/crouch 같은 제자리 클립은 차이가 안 보이므로 판정에 부적합하다.
 
 ---
 

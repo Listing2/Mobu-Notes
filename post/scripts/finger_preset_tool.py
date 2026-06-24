@@ -66,6 +66,38 @@ def _rotation_nodes_for_selection():
     return items
 
 
+def _rotation_nodes_for_zeroing():
+    items = []
+    for model in _selected_models():
+        try:
+            model.Rotation.SetAnimated(True)
+            root_node = model.Rotation.GetAnimationNode()
+        except Exception:
+            root_node = None
+
+        for node, path in _iter_animation_nodes(root_node, "rotation"):
+            fcurve = node.FCurve
+            if fcurve is None:
+                continue
+
+            items.append((model.Name, path, fcurve))
+
+    return items
+
+
+def _key_indices_in_range(fcurve, start_time, end_time):
+    start_ticks = start_time.Get()
+    end_ticks = end_time.Get()
+    indices = []
+
+    for index, key in enumerate(fcurve.Keys):
+        tick = key.Time.Get()
+        if start_ticks <= tick <= end_ticks:
+            indices.append(index)
+
+    return indices
+
+
 def capture_slot(slot_name):
     time = _current_time()
     items = _rotation_nodes_for_selection()
@@ -163,11 +195,98 @@ def hold_slot(slot_name, start_frame, end_frame, blend_frames):
     )
 
 
+def zero_current_rotation():
+    items = _rotation_nodes_for_zeroing()
+    if not items:
+        return "No selected rotation curves."
+
+    time = _current_time()
+    key_count = 0
+
+    for _, _, fcurve in items:
+        fcurve.KeyAdd(time, 0.0)
+        key_count += 1
+
+    FBSystem().Scene.Evaluate()
+    return (
+        "Zero current rotation\n"
+        "Selected models: {models}\n"
+        "Keyed curves: {keys}"
+    ).format(
+        models=len(_selected_models()),
+        keys=key_count,
+    )
+
+
+def zero_range_rotation(start_frame, end_frame):
+    items = _rotation_nodes_for_zeroing()
+    if not items:
+        return "No selected rotation curves."
+
+    first_frame = int(min(start_frame, end_frame))
+    last_frame = int(max(start_frame, end_frame))
+    start_frame = first_frame
+    end_frame = last_frame
+    start_time = _frame_time(start_frame)
+    end_time = _frame_time(end_frame)
+    changed_keys = 0
+    edge_keys = 0
+
+    for _, _, fcurve in items:
+        for index in _key_indices_in_range(fcurve, start_time, end_time):
+            if abs(float(fcurve.KeyGetValue(index))) > 0.000001:
+                fcurve.KeySetValue(index, 0.0)
+                changed_keys += 1
+
+        fcurve.KeyAdd(start_time, 0.0)
+        fcurve.KeyAdd(end_time, 0.0)
+        edge_keys += 2
+
+    FBSystem().Scene.Evaluate()
+    return (
+        "Zero range rotation\n"
+        "Frame range: {start} - {end}\n"
+        "Changed keys: {changed}\n"
+        "Added edge keys: {edges}"
+    ).format(
+        start=start_frame,
+        end=end_frame,
+        changed=changed_keys,
+        edges=edge_keys,
+    )
+
+
+def zero_all_rotation_keys():
+    items = _rotation_nodes_for_selection()
+    if not items:
+        return "No selected rotation curves."
+
+    changed_keys = 0
+    scanned_keys = 0
+
+    for _, _, fcurve in items:
+        for index, _ in enumerate(fcurve.Keys):
+            scanned_keys += 1
+            if abs(float(fcurve.KeyGetValue(index))) > 0.000001:
+                fcurve.KeySetValue(index, 0.0)
+                changed_keys += 1
+
+    FBSystem().Scene.Evaluate()
+    return (
+        "Zero all rotation keys\n"
+        "Scanned keys: {scanned}\n"
+        "Changed keys: {changed}"
+    ).format(
+        scanned=scanned_keys,
+        changed=changed_keys,
+    )
+
+
 class FingerPresetTool(object):
     def __init__(self):
         self.tool = FBCreateUniqueTool(_TOOL_NAME)
         self.tool.StartSizeX = 520
-        self.tool.StartSizeY = 360
+        self.tool.StartSizeY = 410
 
         self.start_edit = FBEditNumber()
         self.start_edit.Value = float(START_FRAME)
@@ -183,7 +302,7 @@ class FingerPresetTool(object):
         self.status.Text = (
             "Finger FK 컨트롤을 같은 순서로 선택하세요.\n"
             "손 모양을 만든 뒤 A/B/C에 캡처하고, 같은 선택에 적용/Hold합니다.\n"
-            "주먹, 펼침, 검지, 그립 포즈에 사용합니다."
+            "Zero 버튼은 선택한 컨트롤의 rotation을 0으로 키잉합니다."
         )
 
         self._build_ui()
@@ -230,7 +349,11 @@ class FingerPresetTool(object):
         self._add_region("apply_c", 175, 128, 150, 28, self._button("Apply C", self._apply_c))
         self._add_region("hold_c", 340, 128, 150, 28, self._button("C Hold", self._hold_c))
 
-        self._add_region("status", 10, 175, 480, 135, self.status)
+        self._add_region("zero_current", 10, 175, 150, 28, self._button("Zero Current", self._zero_current))
+        self._add_region("zero_range", 175, 175, 150, 28, self._button("Zero Range", self._zero_range))
+        self._add_region("zero_all", 340, 175, 150, 28, self._button("Zero All Keys", self._zero_all))
+
+        self._add_region("status", 10, 220, 480, 135, self.status)
 
     def _range(self):
         return int(self.start_edit.Value), int(self.end_edit.Value), int(self.blend_edit.Value)
@@ -248,6 +371,16 @@ class FingerPresetTool(object):
     def _hold(self, slot):
         start, end, blend = self._range()
         self._set_status(hold_slot(slot, start, end, blend))
+
+    def _zero_current(self, control, event):
+        self._set_status(zero_current_rotation())
+
+    def _zero_range(self, control, event):
+        start, end, _ = self._range()
+        self._set_status(zero_range_rotation(start, end))
+
+    def _zero_all(self, control, event):
+        self._set_status(zero_all_rotation_keys())
 
     def _capture_a(self, control, event):
         self._capture("A")
