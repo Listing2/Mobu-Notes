@@ -47,10 +47,11 @@ Path · stub · `setup-dev.ps1`: **[installation.md](../installation.md)** (sing
 3. Select one or many Source bones / CR controls.
 4. Run `Clean Rotation`, `Clean Translation`, or `Clean All`.
 5. Use `Flatten` for a hard A-B value hold; use `Hold Keys` for a blended hold.
-6. Check tool status and play the result.
+6. Use `Linear Rotation` to delete rotation keys between Start/End and reconnect the two edge values with linear interpolation.
+7. Check tool status and play the result.
 
 Use Source cleanup before retarget by selecting the Source skeleton. Use CR cleanup after Plot to CR by selecting CR controls.
-`Clean` reduces jitter with neighbor-key averaging. `Spike` finds/fixes short pops. `Flatten` holds the start-frame value through the end frame.
+`Clean` reduces jitter with neighbor-key averaging. `Spike` finds/fixes short pops. `Flatten` holds the start-frame value through the end frame. `Linear Rotation` keeps only Start/End rotation values and removes noisy in-between keys.
 
 ### Mobu Notes menu
 

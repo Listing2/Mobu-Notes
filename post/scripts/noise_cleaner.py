@@ -183,6 +183,25 @@ def _flatten_fcurve(fcurve, start_time, start_ticks, end_ticks):
     return changed
 
 
+def _linearize_fcurve(fcurve, start_time, end_time, start_ticks, end_ticks):
+    start_value = float(fcurve.Evaluate(start_time))
+    end_value = float(fcurve.Evaluate(end_time))
+    indices = _key_indices_in_range(fcurve, start_ticks, end_ticks)
+    deleted = 0
+
+    # 인덱스가 밀리지 않도록 뒤에서부터 삭제한다.
+    for index in reversed(indices):
+        if fcurve.KeyRemove(index):
+            deleted += 1
+
+    fcurve.KeyAdd(start_time, start_value, kFBInterpolationLinear)
+    if start_ticks != end_ticks:
+        fcurve.KeyAdd(end_time, end_value, kFBInterpolationLinear)
+        return deleted, 2
+
+    return deleted, 1
+
+
 def _spike_indices(fcurve, start_ticks, end_ticks, threshold):
     indices = _key_indices_in_range(fcurve, start_ticks, end_ticks)
     if len(indices) < 3:
@@ -352,6 +371,60 @@ def flatten_selected_range(start_frame, end_frame, channel_mode):
     )
 
 
+def linearize_selected_range(start_frame, end_frame, channel_mode):
+    first_frame = int(min(start_frame, end_frame))
+    last_frame = int(max(start_frame, end_frame))
+    start_time = _frame_time(first_frame)
+    end_time = _frame_time(last_frame)
+    start_ticks = _time_ticks(start_time)
+    end_ticks = _time_ticks(end_time)
+
+    selected = _selected_models()
+    if not selected:
+        return "No selected source bone / CR control."
+
+    changed_curves = 0
+    deleted_keys = 0
+    added_keys = 0
+    scanned_curves = 0
+
+    for model in selected:
+        for node, path in _iter_animation_nodes(model.AnimationNode):
+            if not _channel_matches(path, channel_mode):
+                continue
+
+            fcurve = node.FCurve
+            if fcurve is None:
+                continue
+
+            scanned_curves += 1
+            deleted, added = _linearize_fcurve(fcurve, start_time, end_time, start_ticks, end_ticks)
+            if deleted or added:
+                changed_curves += 1
+                deleted_keys += deleted
+                added_keys += added
+
+    return (
+        "Linear range fix\n"
+        "Selected models: {models}\n"
+        "Frame range: {start} - {end}\n"
+        "Channel: {channel}\n"
+        "Scanned curves: {scanned}\n"
+        "Changed curves: {curves}\n"
+        "Deleted range keys: {deleted}\n"
+        "Added linear edge keys: {added}"
+    ).format(
+        models=len(selected),
+        start=first_frame,
+        end=last_frame,
+        channel=channel_mode,
+        scanned=scanned_curves,
+        curves=changed_curves,
+        deleted=deleted_keys,
+        added=added_keys,
+    )
+
+
 def hold_selected_range(start_frame, end_frame, channel_mode, blend_frames):
     start_frame = int(min(start_frame, end_frame))
     end_frame = int(max(start_frame, end_frame))
@@ -463,7 +536,7 @@ class NoiseCleanerTool(object):
     def __init__(self):
         self.tool = FBCreateUniqueTool(_TOOL_NAME)
         self.tool.StartSizeX = 520
-        self.tool.StartSizeY = 545
+        self.tool.StartSizeY = 585
 
         self.start_edit = FBEditNumber()
         self.start_edit.Value = float(START_FRAME)
@@ -491,7 +564,7 @@ class NoiseCleanerTool(object):
         self.status.Text = (
             "소스 본 또는 CR 컨트롤을 하나 이상 선택한 뒤 버튼을 누르세요.\n"
             "소스 클린업은 retarget 전, CR 클린업은 Plot to CR 후에 사용합니다.\n"
-            "Clean=잔떨림 완화, Spike=튀는 키, Flatten/Hold=구간 고정."
+            "Clean=잔떨림 완화, Spike=튀는 키, Flatten/Hold/Linear=구간 정리."
         )
 
         self._build_ui()
@@ -554,7 +627,9 @@ class NoiseCleanerTool(object):
         self._add_region("flat_trans", 175, 256, 150, 28, self._button("Flatten Translation", self._flatten_translation))
         self._add_region("hold_rot", 340, 256, 150, 28, self._button("Hold Rotation", self._hold_rotation))
 
-        self._add_region("status", 10, 300, 480, 195, self.status)
+        self._add_region("linear_rot", 10, 294, 150, 28, self._button("Linear Rotation", self._linear_rotation))
+
+        self._add_region("status", 10, 338, 480, 195, self.status)
 
     def _settings(self):
         return (
@@ -603,6 +678,16 @@ class NoiseCleanerTool(object):
 
     def _flatten_all(self, control, event):
         self._flatten("all")
+
+    def _linear(self, mode):
+        start, end, strength, radius, passes, keep_edges = self._settings()
+        message = linearize_selected_range(start, end, mode)
+        self.status.Text = message
+        print("[NoiseCleaner] " + message.replace("\n", " | "))
+        FBSystem().Scene.Evaluate()
+
+    def _linear_rotation(self, control, event):
+        self._linear("rotation")
 
     def _scan_spikes(self, control, event):
         start, end, strength, radius, passes, keep_edges = self._settings()
