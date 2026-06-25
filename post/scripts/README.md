@@ -66,10 +66,12 @@ Restart Mobu. A top-level `Mobu Notes` menu should appear with `Noise Cleaner`, 
 ### Finger preset
 
 1. Run `finger_preset_tool.py`.
-2. Select the 15 Finger FK controls in a stable order.
-3. Pose fist / open / index-point / grip, then `Capture A/B/C`.
-4. With the same selection, use `Apply` or set a frame range and `Hold`.
+2. Multi-select the Finger FK controls (Ctrl+click in viewer/Navigator). One Capture/Apply/Zero acts on the whole selection.
+3. Pose fist / open / index-point / grip, then `Capture A/B/C` (session-only) or type a name and `Save / Overwrite` (persistent preset).
+4. With the same selection, use `Apply` / `Apply Preset`, or set a frame range and `Hold` / `Hold Preset`.
 5. Use `Zero Current`, `Zero Range`, or `Zero All Keys` to reset selected rotation curves to `0`.
+
+Presets are stored by control name (`model` + rotation path), so selection order no longer has to match. Named presets persist to `~/.mobu_notes/finger_presets.json`; `List Presets` shows saved names, `Delete Preset` removes one. A/B/C remain fast session-only slots.
 
 For dance/group choreography, repeated pose presets + range hold + light noise clean are usually faster than editing every finger detail.
 

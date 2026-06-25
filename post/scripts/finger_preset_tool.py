@@ -3,6 +3,8 @@
 
 from pyfbsdk import *  # noqa: F403
 from pyfbsdk_additions import *  # noqa: F403
+import json
+import os
 import traceback
 
 
@@ -17,6 +19,11 @@ _SLOTS = {
     "B": [],
     "C": [],
 }
+_PRESETS = {}  # name -> [{"model", "path", "value"}]
+
+
+def _preset_file_path():  # 프리셋 영구 저장 위치 (사용자 홈)
+    return os.path.join(os.path.expanduser("~"), ".mobu_notes", "finger_presets.json")
 
 
 def _frame_time(frame):
@@ -98,39 +105,39 @@ def _key_indices_in_range(fcurve, start_time, end_time):
     return indices
 
 
-def capture_slot(slot_name):
+def _capture_entries():  # 현재 선택된 rotation 커브의 현재 프레임 값 수집
     time = _current_time()
-    items = _rotation_nodes_for_selection()
-    if not items:
-        return "No selected finger FK rotation curves."
-
-    _SLOTS[slot_name] = []
-    for model_name, path, fcurve in items:
-        _SLOTS[slot_name].append({
+    entries = []
+    for model_name, path, fcurve in _rotation_nodes_for_selection():
+        entries.append({
             "model": model_name,
             "path": path,
             "value": float(fcurve.Evaluate(time)),
         })
+    return entries
 
-    return "Captured slot {0}\nRotation curves: {1}".format(slot_name, len(_SLOTS[slot_name]))
 
-
-def _matching_curves(slot_name):
-    slot_values = _SLOTS.get(slot_name, [])
+def _match_entries(entries):  # 저장값을 현재 선택 커브에 이름(model+path) 기준으로 매칭
     items = _rotation_nodes_for_selection()
-    count = min(len(slot_values), len(items))
+    lookup = {(model_name, path): fcurve for model_name, path, fcurve in items}
+
     matches = []
+    for entry in entries:
+        fcurve = lookup.get((entry.get("model"), entry.get("path")))
+        if fcurve is not None:
+            matches.append((fcurve, entry["value"]))
 
-    for index in range(count):
-        matches.append((items[index][2], slot_values[index]["value"]))
+    if not matches and entries and items:  # 이름 매칭 0개면 선택 순서(index)로 폴백
+        count = min(len(entries), len(items))
+        matches = [(items[index][2], entries[index]["value"]) for index in range(count)]
 
-    return matches, len(slot_values), len(items)
+    return matches, len(entries), len(items)
 
 
-def apply_slot(slot_name):
-    matches, preset_count, selected_count = _matching_curves(slot_name)
+def _apply_entries(entries, label):
+    matches, preset_count, selected_count = _match_entries(entries)
     if not matches:
-        return "Slot {0} is empty or no matching selection.".format(slot_name)
+        return "{0}: empty or no matching selection.".format(label)
 
     time = _current_time()
     key_count = 0
@@ -140,31 +147,31 @@ def apply_slot(slot_name):
 
     FBSystem().Scene.Evaluate()
     return (
-        "Applied slot {slot}\n"
-        "Preset curves: {preset}\n"
+        "Applied {label}\n"
+        "Stored curves: {preset}\n"
         "Selected curves: {selected}\n"
         "Keyed curves: {keys}"
     ).format(
-        slot=slot_name,
+        label=label,
         preset=preset_count,
         selected=selected_count,
         keys=key_count,
     )
 
 
-def hold_slot(slot_name, start_frame, end_frame, blend_frames):
-    matches, preset_count, selected_count = _matching_curves(slot_name)
+def _hold_entries(entries, start_frame, end_frame, blend_frames, label):
+    matches, preset_count, selected_count = _match_entries(entries)
     if not matches:
-        return "Slot {0} is empty or no matching selection.".format(slot_name)
+        return "{0}: empty or no matching selection.".format(label)
 
-    start_frame = int(min(start_frame, end_frame))
-    end_frame = int(max(start_frame, end_frame))
+    first_frame = int(min(start_frame, end_frame))
+    last_frame = int(max(start_frame, end_frame))
     blend_frames = max(0, int(blend_frames))
 
-    pre_time = _frame_time(start_frame - blend_frames)
-    start_time = _frame_time(start_frame)
-    end_time = _frame_time(end_frame)
-    post_time = _frame_time(end_frame + blend_frames)
+    pre_time = _frame_time(first_frame - blend_frames)
+    start_time = _frame_time(first_frame)
+    end_time = _frame_time(last_frame)
+    post_time = _frame_time(last_frame + blend_frames)
 
     key_count = 0
     for fcurve, value in matches:
@@ -178,21 +185,117 @@ def hold_slot(slot_name, start_frame, end_frame, blend_frames):
 
     FBSystem().Scene.Evaluate()
     return (
-        "Hold slot {slot}\n"
+        "Hold {label}\n"
         "Frame range: {start} - {end}\n"
         "Blend frames: {blend}\n"
-        "Preset curves: {preset}\n"
+        "Stored curves: {preset}\n"
         "Selected curves: {selected}\n"
         "Added keys: {keys}"
     ).format(
-        slot=slot_name,
-        start=start_frame,
-        end=end_frame,
+        label=label,
+        start=first_frame,
+        end=last_frame,
         blend=blend_frames,
         preset=preset_count,
         selected=selected_count,
         keys=key_count,
     )
+
+
+def capture_slot(slot_name):
+    entries = _capture_entries()
+    if not entries:
+        return "No selected finger FK rotation curves."
+
+    _SLOTS[slot_name] = entries
+    return "Captured slot {0}\nRotation curves: {1}".format(slot_name, len(entries))
+
+
+def apply_slot(slot_name):
+    return _apply_entries(_SLOTS.get(slot_name, []), "slot " + slot_name)
+
+
+def hold_slot(slot_name, start_frame, end_frame, blend_frames):
+    return _hold_entries(_SLOTS.get(slot_name, []), start_frame, end_frame, blend_frames, "slot " + slot_name)
+
+
+def load_presets():  # 시작 시 JSON에서 프리셋 로드
+    global _PRESETS
+    path = _preset_file_path()
+    try:
+        if os.path.isfile(path):
+            with open(path, "r", encoding="utf-8") as handle:
+                data = json.load(handle)
+            if isinstance(data, dict):
+                _PRESETS = data
+    except Exception:
+        print("[FingerPreset] load_presets failed:\n" + traceback.format_exc())
+    return _PRESETS
+
+
+def _write_presets():
+    path = _preset_file_path()
+    folder = os.path.dirname(path)
+    if not os.path.isdir(folder):
+        os.makedirs(folder)
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(_PRESETS, handle, ensure_ascii=False, indent=2)
+
+
+def preset_names():
+    return sorted(_PRESETS.keys())
+
+
+def save_preset(name):  # 현재 선택 전체를 이름 프리셋으로 저장/덮어쓰기 + 파일 반영
+    name = (name or "").strip()
+    if not name:
+        return "Enter a preset name."
+
+    entries = _capture_entries()
+    if not entries:
+        return "No selected finger FK rotation curves."
+
+    overwrite = name in _PRESETS
+    _PRESETS[name] = entries
+    try:
+        _write_presets()
+    except Exception:
+        return "Save failed:\n" + traceback.format_exc()
+
+    return (
+        "{action} preset '{name}'\n"
+        "Rotation curves: {count}\n"
+        "File: {path}"
+    ).format(
+        action="Overwrote" if overwrite else "Saved",
+        name=name,
+        count=len(entries),
+        path=_preset_file_path(),
+    )
+
+
+def delete_preset(name):
+    name = (name or "").strip()
+    if name not in _PRESETS:
+        return "Preset '{0}' not found.".format(name)
+
+    del _PRESETS[name]
+    try:
+        _write_presets()
+    except Exception:
+        return "Delete failed:\n" + traceback.format_exc()
+
+    return "Deleted preset '{0}'".format(name)
+
+
+def apply_preset(name):
+    name = (name or "").strip()
+    return _apply_entries(_PRESETS.get(name, []), "preset '" + name + "'")
+
+
+def hold_preset(name, start_frame, end_frame, blend_frames):
+    name = (name or "").strip()
+    return _hold_entries(_PRESETS.get(name, []), start_frame, end_frame, blend_frames, "preset '" + name + "'")
 
 
 def zero_current_rotation():
@@ -286,7 +389,7 @@ class FingerPresetTool(object):
     def __init__(self):
         self.tool = FBCreateUniqueTool(_TOOL_NAME)
         self.tool.StartSizeX = 520
-        self.tool.StartSizeY = 410
+        self.tool.StartSizeY = 520
 
         self.start_edit = FBEditNumber()
         self.start_edit.Value = float(START_FRAME)
@@ -297,14 +400,18 @@ class FingerPresetTool(object):
         self.blend_edit = FBEditNumber()
         self.blend_edit.Value = float(BLEND_FRAMES)
 
+        self.preset_name_edit = FBEdit()  # 프리셋 이름 입력
+        self.preset_name_edit.Text = ""
+
         self.status = FBMemo()
         self.status.ReadOnly = True
         self.status.Text = (
-            "Finger FK 컨트롤을 같은 순서로 선택하세요.\n"
-            "손 모양을 만든 뒤 A/B/C에 캡처하고, 같은 선택에 적용/Hold합니다.\n"
+            "Finger FK 컨트롤을 multi-select(Ctrl+클릭) 하세요.\n"
+            "A/B/C: 세션 임시 슬롯. Preset: 이름으로 파일 저장(영구).\n"
             "Zero 버튼은 선택한 컨트롤의 rotation을 0으로 키잉합니다."
         )
 
+        load_presets()
         self._build_ui()
 
     def _add_region(self, name, x, y, w, h, control):
@@ -353,7 +460,17 @@ class FingerPresetTool(object):
         self._add_region("zero_range", 175, 175, 150, 28, self._button("Zero Range", self._zero_range))
         self._add_region("zero_all", 340, 175, 150, 28, self._button("Zero All Keys", self._zero_all))
 
-        self._add_region("status", 10, 220, 480, 135, self.status)
+        self._add_region("preset_label", 10, 215, 55, 22, self._label("Preset"))
+        self._add_region("preset_name", 70, 215, 420, 22, self.preset_name_edit)
+
+        self._add_region("preset_save", 10, 245, 150, 28, self._button("Save / Overwrite", self._save_preset))
+        self._add_region("preset_apply", 175, 245, 150, 28, self._button("Apply Preset", self._apply_preset))
+        self._add_region("preset_hold", 340, 245, 150, 28, self._button("Hold Preset", self._hold_preset))
+
+        self._add_region("preset_delete", 10, 283, 150, 28, self._button("Delete Preset", self._delete_preset))
+        self._add_region("preset_list", 175, 283, 150, 28, self._button("List Presets", self._list_presets))
+
+        self._add_region("status", 10, 325, 480, 170, self.status)
 
     def _range(self):
         return int(self.start_edit.Value), int(self.end_edit.Value), int(self.blend_edit.Value)
@@ -381,6 +498,27 @@ class FingerPresetTool(object):
 
     def _zero_all(self, control, event):
         self._set_status(zero_all_rotation_keys())
+
+    def _preset_name(self):
+        return self.preset_name_edit.Text
+
+    def _save_preset(self, control, event):
+        self._set_status(save_preset(self._preset_name()))
+
+    def _apply_preset(self, control, event):
+        self._set_status(apply_preset(self._preset_name()))
+
+    def _hold_preset(self, control, event):
+        start, end, blend = self._range()
+        self._set_status(hold_preset(self._preset_name(), start, end, blend))
+
+    def _delete_preset(self, control, event):
+        self._set_status(delete_preset(self._preset_name()))
+
+    def _list_presets(self, control, event):
+        names = preset_names()
+        body = "\n".join(names) if names else "(none)"
+        self._set_status("Presets ({0}):\n{1}".format(len(names), body))
 
     def _capture_a(self, control, event):
         self._capture("A")
